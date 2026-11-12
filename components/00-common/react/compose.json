@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "id": "react-common",
+  "version": "0.0.0",
+  "kind": "common",
+  "areas": [
+    "frontend"
+  ],
+  "frameworks": [
+    "react"
+  ],
+  "requires": [
+    "frontend-common"
+  ],
+  "packages": {
+    "dependencies": {
+      "react": "19.3.1",
+      "react-dom": "19.3.1"
+    },
+    "devDependencies": {
+      "@types/react": "19.3.0",
+      "@types/react-dom": "19.3.0",
+      "@vitejs/plugin-react": "6.3.0"
+    }
+  }
+}

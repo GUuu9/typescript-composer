@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "node",
+  "version": "0.0.0",
+  "kind": "target",
+  "areas": [
+    "backend"
+  ],
+  "frameworks": [
+    "node"
+  ],
+  "requires": [
+    "node-backend"
+  ],
+  "scripts": {
+    "dev": "node --watch src/backend/index.ts",
+    "start": "node scripts/start.mjs",
+    "check": "tsc --project tsconfig.json",
+    "test": "node --test --test-skip-pattern=\"^slow:\" \"test/**/*.test.ts\"",
+    "build": "node scripts/backendClean.mjs && tsc --project tsconfig.build.json"
+  }
+}

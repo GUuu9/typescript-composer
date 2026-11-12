@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "id": "frontend-common",
+  "version": "0.0.0",
+  "kind": "common",
+  "areas": [
+    "frontend"
+  ],
+  "requires": [
+    "common"
+  ],
+  "packages": {
+    "devDependencies": {
+      "vite": "8.3.8"
+    }
+  },
+  "scripts": {
+    "dev:frontend": "node scripts/web.mjs dev",
+    "start:frontend": "node scripts/web.mjs preview",
+    "check:frontend": "tsc --project tsconfig.frontend.json && tsc --project tsconfig.frontend.test.json",
+    "test:frontend": "node --test \"test/frontend/**/*.test.ts\"",
+    "build:frontend": "tsc --project tsconfig.frontend.json && node scripts/web.mjs build"
+  },
+  "environment": {
+    "WEB_HOST": {
+      "description": "개발/preview IP 또는 localhost. 기본 127.0.0.1",
+      "required": false,
+      "secret": false
+    },
+    "WEB_PORT": {
+      "description": "개발 포트 1~65535. 기본 5173",
+      "required": false,
+      "secret": false
+    },
+    "WEB_PREVIEW_PORT": {
+      "description": "로컬 preview 포트 1~65535. 기본 4173",
+      "required": false,
+      "secret": false
+    }
+  }
+}

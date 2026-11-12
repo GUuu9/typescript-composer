@@ -1,0 +1,16 @@
+{
+  "name": "typescript-composer",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24.22.1"
+  },
+  "scripts": {
+    "compose": "node scripts/compose.mjs",
+    "test": "node --test --test-skip-pattern=\"^slow:\" test/*.test.mjs",
+    "test:integration": "node --test test/nodeNone.integration.mjs",
+    "test:http": "node --test test/http.integration.mjs",
+    "test:web": "node --test test/web.integration.mjs"
+  }
+}

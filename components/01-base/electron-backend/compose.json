@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "id": "electron-backend",
+  "version": "0.0.0",
+  "kind": "base",
+  "areas": [
+    "backend",
+    "preload",
+    "shared"
+  ],
+  "frameworks": [
+    "node",
+    "electron"
+  ],
+  "requires": [
+    "backend-common"
+  ],
+  "packages": {
+    "devDependencies": {
+      "vite": "8.3.8",
+      "electron": "45.3.0"
+    }
+  },
+  "scripts": {
+    "setup:electron": "node scripts/setupElectron.mjs",
+    "check:backend": "tsc --project tsconfig.json && tsc --project tsconfig.preload.json",
+    "build:backend": "node scripts/backendClean.mjs && tsc --project tsconfig.build.json && node scripts/electronBuild.mjs"
+  },
+  "replaceableFiles": [
+    "scripts/electronTarget.mjs",
+    "src/backend/core/electronTarget.ts"
+  ],
+  "registrations": [
+    {
+      "name": "window",
+      "area": "backend",
+      "module": "src/backend/core/window.service.ts",
+      "factory": "createWindowService",
+      "dependencies": {},
+      "lifecycle": [
+        "dispose"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "id": "common",
+  "version": "0.0.0",
+  "kind": "common",
+  "areas": [
+    "shared"
+  ],
+  "scripts": {
+    "verify": "node scripts/verify.mjs"
+  },
+  "packages": {
+    "devDependencies": {
+      "typescript": "7.0.2",
+      "@types/node": "24.19.2"
+    }
+  }
+}

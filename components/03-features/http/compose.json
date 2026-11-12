@@ -1,0 +1,68 @@
+{
+  "schemaVersion": 1,
+  "id": "http",
+  "version": "0.0.0",
+  "kind": "feature",
+  "areas": [
+    "backend"
+  ],
+  "frameworks": [
+    "node"
+  ],
+  "requires": [
+    "backend-common"
+  ],
+  "packages": {
+    "dependencies": {
+      "express": "5.3.0"
+    },
+    "devDependencies": {
+      "@types/express": "5.0.6"
+    }
+  },
+  "environment": {
+    "HTTP_HOST": {
+      "description": "IP 주소 또는 localhost. 빈 값은 127.0.0.1",
+      "required": false,
+      "secret": false
+    },
+    "HTTP_PORT": {
+      "description": "1~65535 정수. 빈 값은 3000",
+      "required": false,
+      "secret": false
+    },
+    "HTTP_AUTO_START": {
+      "description": "true 또는 false. 빈 값은 생성 시 선택",
+      "required": false,
+      "secret": false
+    },
+    "HTTP_ALLOWED_ORIGINS": {
+      "description": "추가 허용 HTTP(S) origin을 쉼표로 지정. 기본 동일 origin만 허용, wildcard·비밀값 금지",
+      "required": false,
+      "secret": false
+    }
+  },
+  "registrations": [
+    {
+      "name": "http",
+      "area": "backend",
+      "module": "src/backend/communications/http/http.communication.ts",
+      "factory": "createHttpCommunication",
+      "dependencies": {},
+      "lifecycle": []
+    }
+  ],
+  "communications": [
+    {
+      "registration": "http",
+      "area": "backend",
+      "configModule": "src/backend/config/http.config.ts",
+      "configFactory": "readHttpConfig",
+      "protocol": "http",
+      "failure": true
+    }
+  ],
+  "scripts": {
+    "test:slow": "node --test --test-name-pattern=\"^slow:\" \"test/backend/http.test.ts\""
+  }
+}

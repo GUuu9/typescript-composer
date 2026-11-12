@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "id": "electron-app",
+  "version": "0.0.0",
+  "kind": "target",
+  "areas": [
+    "backend",
+    "preload",
+    "frontend"
+  ],
+  "frameworks": [
+    "electron",
+    "react"
+  ],
+  "requires": [
+    "electron-backend",
+    "frontend"
+  ],
+  "scripts": {
+    "dev": "node scripts/electronDev.mjs",
+    "start": "node scripts/electronStart.mjs",
+    "check": "node scripts/electronAreas.mjs check",
+    "test": "node scripts/electronAreas.mjs test",
+    "build": "node scripts/electronAreas.mjs build"
+  },
+  "replacements": [
+    {
+      "path": "scripts/electronTarget.mjs",
+      "owner": "electron-backend"
+    },
+    {
+      "path": "src/backend/core/electronTarget.ts",
+      "owner": "electron-backend"
+    },
+    {
+      "path": "scripts/webTarget.mjs",
+      "owner": "frontend"
+    }
+  ]
+}

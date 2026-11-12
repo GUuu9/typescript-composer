@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "id": "node-backend",
+  "version": "0.0.0",
+  "kind": "base",
+  "areas": [
+    "backend"
+  ],
+  "frameworks": [
+    "node"
+  ],
+  "requires": [
+    "backend-common"
+  ],
+  "scripts": {
+    "dev:backend": "node --watch src/backend/index.ts",
+    "start:backend": "node scripts/start.mjs",
+    "check:backend": "tsc --project tsconfig.json",
+    "build:backend": "node scripts/backendClean.mjs && tsc --project tsconfig.build.json"
+  },
+  "replaceableFiles": [
+    "src/backend/core/di.ts",
+    "README.md",
+    "scripts/start.mjs"
+  ]
+}

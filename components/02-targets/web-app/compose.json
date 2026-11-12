@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "web-app",
+  "version": "0.0.0",
+  "kind": "target",
+  "areas": [
+    "frontend"
+  ],
+  "frameworks": [
+    "react"
+  ],
+  "requires": [
+    "frontend"
+  ],
+  "scripts": {
+    "dev": "npm run dev:frontend",
+    "start": "npm run start:frontend",
+    "check": "npm run check:frontend",
+    "test": "npm run test:frontend",
+    "build": "npm run build:frontend"
+  }
+}

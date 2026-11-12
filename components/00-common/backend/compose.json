@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "id": "backend-common",
+  "version": "0.0.0",
+  "kind": "common",
+  "areas": [
+    "backend"
+  ],
+  "requires": [
+    "common"
+  ],
+  "scripts": {
+    "test:backend": "node --test --test-skip-pattern=\"^slow:\" \"test/backend/**/*.test.ts\" \"test/shared/**/*.test.ts\" \"test/integration/**/*.test.ts\""
+  }
+}

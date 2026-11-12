@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "id": "ipc",
+  "version": "0.0.0",
+  "kind": "feature",
+  "areas": [
+    "backend",
+    "preload",
+    "shared"
+  ],
+  "frameworks": [
+    "electron"
+  ],
+  "requires": [
+    "electron-backend"
+  ],
+  "registrations": [
+    {
+      "name": "ipc",
+      "area": "backend",
+      "module": "src/backend/communications/ipc/createIpc.ts",
+      "factory": "createIpcCommunication",
+      "dependencies": {
+        "window": "window"
+      },
+      "lifecycle": []
+    }
+  ],
+  "communications": [
+    {
+      "registration": "ipc",
+      "area": "backend",
+      "configModule": "src/backend/config/ipc.config.ts",
+      "configFactory": "readIpcConfig",
+      "protocol": "ipc"
+    }
+  ]
+}

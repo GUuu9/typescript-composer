@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    "target": "ES2023",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "strict": true,
+    "verbatimModuleSyntax": true,
+    "erasableSyntaxOnly": true,
+    "rewriteRelativeImportExtensions": true,
+    "noEmit": true,
+    "types": [
+      "node"
+    ],
+    "lib": [
+      "ES2023"
+    ]
+  },
+  "include": [
+    "src/backend/**/*.ts",
+    "src/shared/**/*.ts",
+    "test/backend/**/*.ts",
+    "test/shared/**/*.ts",
+    "test/integration/**/*.ts"
+  ]
+}

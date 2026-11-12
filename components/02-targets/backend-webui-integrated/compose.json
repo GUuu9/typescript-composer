@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "id": "backend-webui-integrated",
+  "version": "0.0.0",
+  "kind": "target",
+  "areas": [
+    "backend",
+    "frontend"
+  ],
+  "frameworks": [
+    "node",
+    "react"
+  ],
+  "requires": [
+    "backend-webui"
+  ],
+  "replacements": [
+    {
+      "path": "src/backend/core/di.ts",
+      "owner": "node-backend"
+    },
+    {
+      "path": "scripts/start.mjs",
+      "owner": "node-backend"
+    }
+  ],
+  "scripts": {},
+  "environment": {}
+}

@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "id": "backend-webui",
+  "version": "0.0.0",
+  "kind": "target",
+  "areas": [
+    "backend",
+    "frontend"
+  ],
+  "frameworks": [
+    "node",
+    "react"
+  ],
+  "requires": [
+    "node-backend",
+    "frontend"
+  ],
+  "replacements": [
+    {
+      "path": "scripts/webTarget.mjs",
+      "owner": "frontend"
+    },
+    {
+      "path": "README.md",
+      "owner": "node-backend"
+    }
+  ],
+  "scripts": {
+    "dev": "node scripts/dev.mjs",
+    "start": "node scripts/start.mjs",
+    "check": "node scripts/areas.mjs check",
+    "test": "node scripts/areas.mjs test",
+    "build": "node scripts/areas.mjs build"
+  },
+  "environment": {
+    "DEV_API_TARGET": {
+      "description": "개발 /api 프록시 HTTP(S) origin. 기본 http://127.0.0.1:3000",
+      "required": false,
+      "secret": false
+    }
+  }
+}

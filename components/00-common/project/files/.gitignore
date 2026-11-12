@@ -1,0 +1,12 @@
+node_modules/
+dist/
+release/
+coverage/
+*.tsbuildinfo
+.env
+.env.*
+!.env.example
+.DS_Store
+
+# Electron development build staging
+/.composer/build-*/

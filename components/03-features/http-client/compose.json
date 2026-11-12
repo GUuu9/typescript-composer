@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "id": "http-client",
+  "version": "0.0.0",
+  "kind": "feature",
+  "areas": [
+    "frontend"
+  ],
+  "frameworks": [],
+  "requires": [
+    "frontend-common"
+  ],
+  "environment": {
+    "PUBLIC_API_BASE_URL": {
+      "description": "브라우저 공개 API 주소. 결합 구성 기본 /api, 단독 HTTP는 사용 전에 지정. 비밀값 금지",
+      "required": false,
+      "secret": false
+    }
+  },
+  "registrations": [
+    {
+      "name": "api",
+      "area": "frontend",
+      "module": "src/frontend/apis/http.api.ts",
+      "factory": "createHttpApi",
+      "dependencies": {},
+      "lifecycle": []
+    }
+  ]
+}

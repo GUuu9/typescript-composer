@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "id": "frontend",
+  "version": "0.0.0",
+  "kind": "base",
+  "areas": [
+    "frontend"
+  ],
+  "frameworks": [
+    "react"
+  ],
+  "requires": [
+    "react-common"
+  ],
+  "replaceableFiles": [
+    "scripts/webTarget.mjs"
+  ]
+}

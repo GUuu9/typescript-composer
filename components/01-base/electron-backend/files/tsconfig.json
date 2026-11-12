@@ -1,0 +1,10 @@
+{
+  "extends": "./tsconfig.backend.base.json",
+  "compilerOptions": {
+    "lib": [
+      "ES2023",
+      "DOM"
+    ],
+    "noEmitOnError": true
+  }
+}

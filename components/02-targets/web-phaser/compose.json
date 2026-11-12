@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "web-phaser",
+  "version": "0.0.0",
+  "kind": "target",
+  "areas": [
+    "frontend"
+  ],
+  "frameworks": [
+    "phaser"
+  ],
+  "requires": [
+    "phaser"
+  ],
+  "scripts": {
+    "dev": "npm run dev:frontend",
+    "start": "npm run start:frontend",
+    "check": "npm run check:frontend",
+    "test": "npm run test:frontend",
+    "build": "npm run build:frontend"
+  }
+}

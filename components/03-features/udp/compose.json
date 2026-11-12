@@ -1,0 +1,62 @@
+{
+  "schemaVersion": 1,
+  "id": "udp",
+  "version": "0.0.0",
+  "kind": "feature",
+  "areas": [
+    "backend"
+  ],
+  "frameworks": [
+    "node"
+  ],
+  "requires": [
+    "backend-common"
+  ],
+  "environment": {
+    "UDP_HOST": {
+      "description": "IP 또는 localhost. 기본 127.0.0.1",
+      "required": false,
+      "secret": false
+    },
+    "UDP_PORT": {
+      "description": "1~65535. 기본 4001",
+      "required": false,
+      "secret": false
+    },
+    "UDP_ALLOWED_PEERS": {
+      "description": "정확한 IP 쉼표 목록. 빈 값은 loopback만 허용",
+      "required": false,
+      "secret": false
+    },
+    "UDP_AUTH_TOKEN": {
+      "description": "외부 bind 필수 ASCII 32~256자 토큰",
+      "required": false,
+      "secret": true
+    },
+    "UDP_AUTO_START": {
+      "description": "true/false. 빈 값은 생성 시 선택",
+      "required": false,
+      "secret": false
+    }
+  },
+  "registrations": [
+    {
+      "name": "udp",
+      "area": "backend",
+      "module": "src/backend/communications/udp/udp.communication.ts",
+      "factory": "createUdpCommunication",
+      "dependencies": {},
+      "lifecycle": []
+    }
+  ],
+  "communications": [
+    {
+      "registration": "udp",
+      "area": "backend",
+      "configModule": "src/backend/config/udp.config.ts",
+      "configFactory": "readUdpConfig",
+      "protocol": "udp",
+      "failure": true
+    }
+  ]
+}
