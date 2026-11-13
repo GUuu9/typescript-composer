@@ -1,46 +1,18 @@
-# 공통 구성품 재배치 검증
+# 파트별 검증 기준
 
-v0.0.0의 선택 검사 참고 자료입니다. 전체 실행은 완료 조건이 아니며 사용 중 문제 조사나 명시적 요청에 필요한 범위만 수행합니다. 미실행 결과를 통과로 기록하지 않습니다.
+검증은 변경한 파트의 단위 동작만 확인합니다. 전체 조건·표준 구성 조합을 매번 생성·설치·검사하지 않습니다. 사용 중 문제가 보고되면 해당 코드와 직접 의존 부분만 재현합니다. 기존 project 앱은 사용하지 않습니다.
 
-이번 재배치 후 기능 검사는 에이전트가 실행하지 않았습니다. 아래 명령은 사용자가 별도 터미널에서 실행합니다. 기존 `project/` 앱은 검증 대상으로 사용하지 않습니다.
+| 변경 파트 | Composer 루트에서 선택할 검사 | 목적 |
+| :--- | :--- | :--- |
+| 구성 선택·기본 계획 | node --test test/baseComposition.test.mjs | 필수 연결만 계획하고 대화 질문을 단순하게 유지하는지 확인 |
+| 선언·파일 조립 | node --test test/composition.test.mjs | 선언·충돌·소유권 규칙 확인 |
+| 생성 상태·재시도 | node --test test/verification.test.mjs | 대역 명령으로 상태 전환과 실패 보존 확인 |
+| 환경 로딩 | node --test test/environment.test.mjs | 설정 로딩·OS 우선순위 확인 |
 
-## Composer 조립 확인
+필요한 행 하나만 실행합니다. 일부 Composer 검사는 임시 파일과 새 앱 출력을 사용하지만 의존성 설치·외부 연결·실제 앱 실행을 전체 반복하지 않습니다. test/baseComposition의 여섯 구성은 메모리 계획 확인이며 전체 앱 실행 행렬이 아닙니다.
 
-작업 경로는 Composer 저장소 루트이며 Node 24.22.1 이상이 필요합니다.
+추가 기능은 각 기능 docs/validation의 단위 검사 명령을 사용합니다. HTTP·TCP·UDP는 설정·인코딩 등 순수 부분을 우선하며 Socket.IO·IPC는 가능한 대역과 설정 검사로 제한합니다. 통신·GUI·긴 시간 제한 검사는 해당 문제 조사 시에만 선택합니다.
 
-```sh
-node --test test/composition.test.mjs test/verification.test.mjs test/environment.test.mjs test/electron.test.mjs
-```
+검사 전 정확한 작업 경로·명령·의존성·목적을 안내하고 미실행·성공·실패를 구분해 기록합니다. npm run verify는 최초 생성 검증/복구 명령이며 일상적인 단위 검사 명령으로 안내하지 않습니다. 생성기의 기존 install/check/test/build 실행 계약 자체는 이 문서 변경으로 바꾸지 않습니다.
 
-기대 결과: 6개 표준 구성에서 project 공통이 항상 포함되고 backend/frontend 공통은 선택 영역에서만 포함되고 React 단독·Phaser 결합은 react-common도 포함합니다. runtime은 backend-common이, target 교체용 DI는 해당 base/target이 소유합니다. 상태 활성화·재시도·환경 로딩 검사도 통과해야 합니다. electron-backend 단독 선택은 거부되고 대화형 마지막 6번은 electron-phaser여야 합니다.
-
-## 새 임시 앱 설치·타입·테스트·빌드
-
-같은 저장소 루트에서 다음을 실행하면 임시 경로에 6개 표준 구성의 새 앱을 출력합니다. 실제 설치와 검사는 다음 단계에서 개별 실행합니다.
-
-```sh
-node --input-type=module <<'JS'
-import { mkdtemp, realpath } from 'node:fs/promises';
-import os from 'node:os';
-import path from 'node:path';
-import { configurations } from './scripts/configurations.mjs';
-import { generateProject } from './scripts/generate.mjs';
-const parent = await realpath(await mkdtemp(path.join(os.tmpdir(), 'composer-common-')));
-for (const entry of configurations) {
-  const { app } = await generateProject({ parent, name: entry.id, selection: { configuration: entry.id, communications: entry.required.length ? entry.required : ['none'] }, verify: false });
-  console.log(app);
-}
-JS
-```
-
-출력된 각 앱 경로로 이동해 실행합니다. 레지스트리 접근과 패키지 다운로드가 필요합니다.
-
-```sh
-npm run verify
-```
-
-기대 결과: install → check → test → build 성공 후에만 `.composer/state.json`이 활성화됩니다. 단독 웹에는 backend 파일이 없어야 하며 Node·Electron에서는 공통 runtime·환경 설정과 각 base의 실행 연결이 함께 검사되어야 합니다. GUI·실제 외부 연결 성공을 의미하지는 않습니다.
-
-추가 프로세스 검증이 필요하면 Composer 루트에서 `npm run test:integration`(Node None 시작·감시·종료), `npm run test:http`(HTTP 조립·응답), `npm run test:web`(단독/복합 웹 실행)을 각각 실행합니다. 설치와 시간 제한 검사가 포함됩니다. Electron GUI·TCP 외부 연결 검증은 각 기능의 문서를 따릅니다.
-
-실패하면 임시 앱의 소스·lock·진단을 보존하고 실패 단계와 로그를 확인합니다. 원본 경로·파일 소유권 오류는 생성기를 수정한 뒤 새 임시 앱으로 재확인하며, state 해시를 직접 수정하지 않습니다. 개별 설치·검사 실패는 해당 앱에서 원인을 해결한 뒤 `npm run verify`로 재시도합니다.
+에이전트는 기본적으로 구문·JSON·diff만 확인합니다. 위 테스트도 명시적 요청 없이 자동 실행하지 않습니다.

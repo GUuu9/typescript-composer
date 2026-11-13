@@ -48,3 +48,9 @@ Electron 초기화 중 종료 수정의 참고 절차는 [electronShutdownValida
 - [ipc](../components/03-features/ipc/files/docs/ipc.md)
 - [ipc-client](../components/03-features/ipc-client/files/docs/ipcClient.md)
 - [logger](../components/03-features/logger/files/docs/logger.md)
+
+현재 조립 범위는 [기본 구성·수동 기능 계약](contracts/manual-features-contract.md)을 우선합니다.
+
+기능별 기본 검사는 해당 validation 문서의 단위 검사만 수행합니다. [HTTP client](../components/03-features/http-client/files/docs/validation/httpClientValidation.md)·[IPC](../components/03-features/ipc/files/docs/validation/ipcValidation.md)·[IPC client](../components/03-features/ipc-client/files/docs/validation/ipcClientValidation.md)도 독립된 대역 검사로 안내합니다.
+
+[VS Code workspace 생성 계약](contracts/workspace-contract.md): Composer와 선택한 project 하위 폴더를 개인 작업 영역으로 여는 명령입니다.

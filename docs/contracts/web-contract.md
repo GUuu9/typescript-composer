@@ -12,7 +12,7 @@
 
 ## Frontend 조립과 API
 
-frontend/core/di의 di.ts·diProvider.tsx·features.manifest.ts·수명 코드를 사용합니다. main은 선택 객체 생성 → 필수 초기화 → React render 순서이며 실패 시 렌더링을 시작하지 않고 역순 정리합니다. HMR·해제에서도 같은 공유 객체를 정리합니다. Service가 DI 전체를 참조하거나 backend 소스를 import하지 않습니다. 기본 observable·화면 상태 구현은 실제 사용이 필요한 경우에만 추가합니다.
+frontend/core/di의 di.ts·diProvider.tsx·수명 코드를 사용합니다. main은 선택 객체 생성 → 필수 초기화 → React render 순서이며 실패 시 렌더링을 시작하지 않고 역순 정리합니다. HMR·해제에서도 같은 공유 객체를 정리합니다. Service가 DI 전체를 참조하거나 backend 소스를 import하지 않습니다. 기본 observable·화면 상태 구현은 실제 사용이 필요한 경우에만 추가합니다.
 
 공통 Api 계약은 `get(path: string, signal?: AbortSignal): Promise<unknown>`를 사용합니다. HTTP 구현은 HttpApi이며 선택된 경우만 DI에 연결합니다. None에서는 HTTP 호출을 하지 않고 Api가 없는 상태를 명시합니다. get의 path는 /로 시작하는 앱 경로만 허용하며 외부 URL·//·역슬래시를 거부합니다. base 주소와 결합해 fetch하고, 비정상 HTTP status·JSON이 아닌 성공 응답은 오류로 전달합니다. payload의 업무 구조 검증은 Service 책임이며 generic 타입 단언으로 검증을 대체하지 않습니다. AbortSignal은 해당 fetch와 결과 반영을 중단하며 서버 업무의 자동 취소를 의미하지 않습니다.
 
@@ -57,7 +57,7 @@ check:backend·check:frontend, test:backend·test:frontend, build:backend·build
 
 React base는 frontend 소스·타입 검사·Vite 입력·테스트를 소유합니다. web-app·backend-webui의 target은 명령 조립·실행 연결 차이를 선언합니다. base의 명령이 다른 구성의 명령과 충돌하지 않도록 각 base는 영역 명령을 선언하고 최상위 명령은 target이 소유하는 방식으로 정리합니다. Node 단독 명령의 기존 동작은 보존합니다.
 
-frontend 매니페스트는 frontend/core/di/features.manifest.ts에 생성하며 backend 매니페스트와 소유권·등록 영역을 구분합니다. 생성된 매니페스트만 generated로 관리하고 DI·업무·문서는 처음 생성 후 사용자 소유입니다. .env와 기존 project/는 수정하지 않습니다. 새 target 교체는 base가 명시적으로 허용한 최초 생성 연결 파일에만 적용합니다. 무조건 덮어쓰기·기존 앱 자동 이행·사후 추가 명령은 구현하지 않습니다.
+frontend와 backend 초기 연결은 각각의 di.ts에 생성하며 DI·업무·문서는 처음 생성 후 사용자 소유입니다. .env와 기존 project/는 수정하지 않습니다. 새 target 교체는 base가 명시적으로 허용한 최초 생성 연결 파일에만 적용합니다. 무조건 덮어쓰기·기존 앱 자동 이행·사후 추가 명령은 구현하지 않습니다.
 
 ## 완료 검사
 

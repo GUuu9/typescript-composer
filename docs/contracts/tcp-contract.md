@@ -9,7 +9,7 @@
 
 typescript-backend의 선택 통신과 backend-webui·electron-app·electron-phaser의 추가 Main/backend 통신으로 조립합니다. 정적 웹 frontend에는 포함하지 않습니다. HTTP·IPC와 동시 선택해도 업무 객체는 같은 DI 인스턴스를 공유하며 기본 업무 Bridge·예제 데이터는 생성하지 않습니다.
 
-원본은 components/03-features/tcp에 두고 기존 통신 등록·환경 선언·선택 검증·생성 매니페스트를 확장합니다. 기존 앱이나 사용자 DI를 재작성하지 않습니다. 신규 생성만 지원하며 feature add는 별도 요청 시 구현합니다.
+원본은 components/03-features/tcp에 두고 기존 통신 등록·환경 선언·선택 검증·생성 매니페스트를 확장합니다. 기존 앱이나 사용자 DI를 재작성하지 않습니다. 신규 생성만 지원하며 feature add는 구현하지 않습니다.
 
 ## 파일과 API
 
@@ -66,7 +66,7 @@ listen 실패는 해당 시도 자원을 정리하고 원인·정리 오류를 �
 
 ## 치명적 장애 전달
 
-communications 선언에 선택 failure: true를 추가하면 생성된 CommunicationEntry가 해당 인스턴스의 읽기 전용 failure: Promise<never>를 연결합니다. 일반 stop/dispose와 개별 요청 실패는 이를 reject하지 않습니다. TCP 수신 서버의 치명적 장애만 원래 오류로 reject하며 앱 종료 후 같은 인스턴스를 복원하지 않습니다.
+사용자가 DI의 CommunicationEntry에 failure를 지정해 해당 인스턴스의 읽기 전용 failure: Promise<never>를 연결합니다. 일반 stop/dispose와 개별 요청 실패는 이를 reject하지 않습니다. TCP 수신 서버의 치명적 장애만 원래 오류로 reject하며 앱 종료 후 같은 인스턴스를 복원하지 않습니다.
 
 Node·Electron의 동일 수명 관리자에서 이 실패를 관찰하고 시작 중/실행 중 모두 성공으로 바꾸지 않습니다. Node 진입점의 자연 종료 대기와 Electron 창 수명에서도 실패 종료를 반영합니다. 기존 HTTP·IPC는 이 선택 선언이 없으면 기존 동작을 유지합니다. 필요 시 start 실패는 해당 start의 오류로 처리하며 다른 통신을 임의 중단하지 않습니다.
 
@@ -74,7 +74,7 @@ Node·Electron의 동일 수명 관리자에서 이 실패를 관찰하고 시�
 
 구현 중 단위·loopback·통합·제한시간 검사는 자동 실행하지 않습니다. framing의 분할/병합·크기/UTF-8·인증·등록·종료/재시작·치명적 장애·복수 통신 공유·부분 시작 실패의 검증 절차를 문서로 남기고 사용자가 기능 사용 시 직접 실행합니다. 에이전트는 짧은 문법·diff 확인만 기본 수행하며 다른 직접 검증은 사용자 명시 요청 범위로 제한합니다. 기존에 실제 수행한 결과는 보존하고 아직 실행하지 않은 항목을 구분합니다.
 
-기존 project/는 어떤 검사에도 사용하지 않습니다. 기본 검사에 긴 대기를 넣지 않고 TCP의 긴 검사는 선택된 구성에만 test:tcp:slow로 제공합니다. UDP·MQTT·Socket.IO의 전송별 기준은 통신 확장 계약을 따릅니다.
+기존 project/는 어떤 검사에도 사용하지 않습니다. 기본 검사에 긴 대기를 넣지 않고 TCP의 긴 검사는 선택된 구성에만 테스트 파일의 slow: 이름을 지정해 직접 실행합니다. UDP·MQTT·Socket.IO의 전송별 기준은 통신 확장 계약을 따릅니다.
 
 근거: 승인된 공통 조립·HTTP 계약과 이 문서의 통신 수명 기준. Node 기본 API는 [net](https://nodejs.org/download/release/v24.22.1/docs/api/net.html)·[stream](https://nodejs.org/download/release/v24.22.1/docs/api/stream.html)·[token 비교](https://nodejs.org/docs/latest-v24.x/api/crypto.html#cryptotimingsafeequala-b)를 따릅니다.
 

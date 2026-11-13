@@ -8,7 +8,7 @@ Main은 backend DI·수명을 사용합니다. Electron 타입 선언이 DOM 타
 
 IPC는 살아 있는 예상 창·main frame·정확한 로컬 페이지를 매 요청마다 검사합니다. 등록 경로만 이름 있는 preload 메서드로 공개하고 임의 채널 호출은 제공하지 않습니다. 기본 앱에는 업무 메서드가 없습니다. 현재 get은 query 없는 정확한 경로·인자 없는 메서드입니다. 입력이 필요한 업무는 payload 계약과 Bridge 검증을 정의한 후 확장합니다. 요청·응답은 JSON 직렬화 가능한 값으로 각각 최대 64 KiB입니다. 종료 시 진행 요청을 최대 5초 기다리며 초과는 오류입니다. AbortSignal은 renderer의 결과 반영 중단이며 Main 작업 자동 취소가 아닙니다. 종료 제한시간은 Main 업무의 강제 취소도 보장하지 않습니다.
 
-기능 구성품은 compose.json의 ipcRoutes에 path·method·channel·registration을 선언하고 같은 backend 등록 객체를 IpcBridge로 연결합니다. Bridge의 route는 해당 선언과 일치해야 합니다. 경로·메서드·채널·Bridge 중복과 누락을 생성 전에 거부합니다. shared/ipcRoutes.manifest.ts와 features.manifest.ts는 생성기 소유이므로 직접 수정하지 않습니다. 사후 추가 명령은 아직 없습니다.
+기능 구성품은 compose.json의 ipcRoutes에 path·method·channel·registration을 선언하고 같은 backend 등록 객체를 IpcBridge로 연결합니다. Bridge의 route는 해당 선언과 일치해야 합니다. 경로·메서드·채널·Bridge 중복과 누락을 생성 전에 거부합니다. IPC 경로 변경은 shared 경로 목록·Main·preload·Api를 함께 수정합니다. DI 초기 연결은 사용자 소유입니다. 자동 추가 명령은 구현하지 않습니다.
 
 .env는 Main만 읽고 renderer·preload에 환경 전체를 전달하지 않습니다. 선택 HTTP는 HTTP_* 설정을 사용합니다. IPC 보안·필수 자동 시작은 환경 값으로 완화하지 않습니다. 로컬 화면 산출물 외 파일·네트워크·새 창·탐색·권한 요청은 거부합니다. renderer의 외부 통신은 별도 보안 계약 후 확장합니다.
 

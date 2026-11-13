@@ -40,6 +40,6 @@ HTTP 선택 앱의 실제 시간 제한 검사는 `npm run test:slow`로 별도 
 
 ## 기능 추가와 Git
 
-현재 자동 기능 추가 명령은 제공하지 않습니다. 매니페스트·원본 해시·state를 직접 편집해 우회하지 마세요. DI·업무·문서는 사용자 소유이고 features.manifest.ts는 생성기 관리입니다. 향후 추가 원본은 부모 Composer의 components/이며 실행·빌드는 앱 복사본만 사용합니다.
+현재 자동 기능 추가 명령은 제공하지 않습니다. 매니페스트·원본 해시·state를 직접 편집해 우회하지 마세요. DI·업무·문서는 사용자 소유이고 초기 연결은 di.ts 안에서 사용자가 직접 관리합니다. 향후 추가 원본은 부모 Composer의 components/이며 실행·빌드는 앱 복사본만 사용합니다.
 
 이 앱은 Composer와 독립 Git 저장소입니다. Git 초기화는 commit·remote·push를 수행하지 않습니다. 소스·문서·테스트·설정·package-lock.json·.composer/state.json·.gitkeep을 저장하고 실제 .env·키·토큰·node_modules·dist·release는 저장하지 않습니다. 커밋 제목은 type(scope): 한국어 요약으로 작성하며 update.md는 최신순으로 실제 검증 범위를 기록합니다.

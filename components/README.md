@@ -1,6 +1,8 @@
 <!-- version: v0.0.0 -->
 # 구성품 원본
 
+현재 생성 범위: Compose는 표준 구성과 필수 연결만 생성합니다. 추가 통신·Service 선택과 자동 추가는 제공하지 않습니다. 기능은 필요한 파일을 복사하고 패키지·환경·DI를 수동 연결합니다. feature add는 구현 대상에서 제외합니다. 각 기능 docs의 수동 연결 안내를 따릅니다.
+
 공통과 4개 베이스의 `compose.json` 선언으로 표준 6개 구성을 조립합니다. Node·React·Electron 기반에 Phaser 웹·Electron의 최소 Scene·DI·게임 수명을 추가했습니다. 실제 canvas·WebGL·Electron GUI는 미검증입니다. 앱은 수동 폴더 복사 대신 루트의 `npm run compose`로 생성합니다.
 
 ## 원본 배치
@@ -46,11 +48,11 @@
 
 ## 구성품을 채울 때
 
-공통 → 선택 base → target → feature 순서로 계획합니다. 각 구성품의 패키지·명령·의존성·등록은 `compose.json`에서 소유합니다. package.json·.env.example·매니페스트는 선언을 모아 생성합니다. target의 교체 가능 파일도 실제 연결 구현에서 명시합니다. feature는 기존 파일을 무조건 덮어쓰지 않습니다.
+공통 → 선택 base → target → feature 순서로 계획합니다. 기본 구성과 필수 연결의 패키지·명령·의존성·등록은 `compose.json`에서 소유합니다. package.json·.env.example와 di.ts의 초기 연결은 해당 선언으로 생성합니다. 추가 기능은 자동 조립 선언 없이 소스와 수동 연결 문서로 제공합니다. target의 교체 가능 파일도 실제 연결 구현에서 명시합니다. feature는 기존 파일을 무조건 덮어쓰지 않습니다.
 
 선택하지 않은 영역을 복사한 뒤 삭제하지 않습니다. 빈 표준 폴더는 `.gitkeep`으로 보존하며 업무 예제나 빈 클래스를 넣지 않습니다. frontend DI 경로는 AGENTS.md의 `core/di`를 따릅니다.
 
-선언·파일 소유권·수명·상태 형식은 [승인된 공통 조립 계약](../docs/contracts/composition-contract.md)을 따릅니다. Node None·HTTP와 React·backend-webui를 선택된 베이스·target·feature로 조립합니다. 단독 웹은 backend를 포함하지 않으며 frontend 매니페스트는 core/di에 별도 생성합니다. 실제 검사 결과와 브라우저 검증 제한은 루트 README·update.md를 따릅니다. 사후 추가는 미구현입니다.
+선언·파일 소유권·수명·상태 형식은 [승인된 공통 조립 계약](../docs/contracts/composition-contract.md)을 따릅니다. Node None·HTTP와 React·backend-webui를 선택된 베이스·target·feature로 조립합니다. 단독 웹은 backend를 포함하지 않습니다. backend는 core/di.ts, frontend는 core/di/di.ts에 초기 연결을 포함하며 생성 이후 사용자가 직접 수정합니다. 별도 features.manifest.ts는 생성하지 않습니다. 실제 검사 결과와 브라우저 검증 제한은 루트 README·update.md를 따릅니다. 자동 사후 추가 명령은 구현하지 않습니다.
 
 [Express HTTP 계약](../docs/contracts/http-contract.md)에 통신 객체·Bridge 등록·요청 제한·종료 정책·통신 등록을 명시했습니다. 업무 API를 포함하지 않고 HTTP_HOST·HTTP_PORT·HTTP_AUTO_START·HTTP_ALLOWED_ORIGINS를 선택된 .env.example에 안내합니다.
 
@@ -60,7 +62,7 @@
 
 [Electron 계약](../docs/contracts/electron-contract.md)은 로컬 산출물·보안 창·IPC 등록·개발 재시작 기준입니다. HTTP는 Node와 Electron 양쪽의 backend 수명 계약을 사용하므로 특정 Node base 대신 backend-common을 선언 의존성으로 둡니다.
 
-[Phaser 계약](../docs/contracts/phaser-contract.md)에 따라 프레임워크 독립 코드는 00-common/frontend, React 공용 Provider·패키지·TSX·plugin은 00-common/react, 게임 전용 코드·Phaser 의존성은 Phaser base에 둡니다. HTTP/IPC client는 frontend-common을 요구하며 React 전용으로 제한하지 않습니다. 생성 매니페스트 소유자는 선택한 frontend/phaser base입니다.
+[Phaser 계약](../docs/contracts/phaser-contract.md)에 따라 프레임워크 독립 코드는 00-common/frontend, React 공용 Provider·패키지·TSX·plugin은 00-common/react, 게임 전용 코드·Phaser 의존성은 Phaser base에 둡니다. HTTP/IPC client는 frontend-common을 요구하며 React 전용으로 제한하지 않습니다. frontend 초기 연결은 di.ts에 포함하며 이후 사용자가 수정합니다.
 
 공통 구조 변경 후 사용자 검증은 [공통 구성 검증 절차](../docs/validation/commonValidation.md)를 따릅니다. 기존 생성 앱의 원본·상태는 자동 이행하지 않습니다.
 
@@ -68,4 +70,4 @@
 
 Composer 계약은 ../docs/contracts/, 공통 검증 안내는 ../docs/validation/에 둡니다. 각 구성품의 files/docs/validation/은 새 앱의 docs/validation/으로 복사되며 실행 시 Composer 문서에 의존하지 않습니다. 전체 위치는 [문서 색인](../docs/README.md)을 따릅니다.
 
-logger는 [승인 계약](../docs/contracts/logger-contract.md)에 따라 선택한 backend/Main에만 포함합니다. 통신 onError의 함수형 API는 유지하며 생성 매니페스트가 logger.report로 어댑트합니다. frontend나 미선택 앱에는 파일·환경 키·등록을 추가하지 않습니다.
+logger 등 추가 기능은 files/의 소스를 수동 복사하고 기능 docs에 따라 앱 DI·패키지·설정을 연결합니다. 추가 기능에는 compose.json 자동 조립 선언을 두지 않습니다.

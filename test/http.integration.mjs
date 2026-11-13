@@ -25,7 +25,7 @@ async function unusedPort() {
 
 test('HTTP app generates and verifies, reads .env, serves 404, restarts dev and releases its port', { timeout: 180000 }, async () => {
   const parent = await realpath(await mkdtemp(path.join(os.tmpdir(), 'composer-http-integration-')));
-  const { app } = await generateProject({ parent, name: 'http-app', selection: { configuration: 'typescript-backend', communications: ['http'] } });
+  const { app } = await generateProject({ parent, name: 'http-app', selection: { configuration: 'backend-webui', communications: ['http'] } });
   console.log(`검증 앱 보존: ${app}`);
   const state = JSON.parse(await readFile(path.join(app, '.composer/state.json')));
   assert.deepEqual(state.components.map(item => item.id), ['common', 'backend-common', 'node-backend', 'node', 'http']);

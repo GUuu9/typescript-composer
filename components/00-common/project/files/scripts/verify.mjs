@@ -1,6 +1,6 @@
 import { readFile, writeFile, rename, unlink, lstat } from 'node:fs/promises';
 import { spawn } from 'node:child_process';
-import { createHash, randomUUID } from 'node:crypto';
+import { randomUUID } from 'node:crypto';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -52,11 +52,6 @@ try {
   reason = '생성 시 등록한 명령·패키지 항목과 현재 package.json이 다릅니다.';
   for (const [name, command] of Object.entries(state.managedEntries.scripts)) if (pkg.scripts?.[name] !== command) throw new Error('Managed script changed');
   for (const kind of ['dependencies', 'devDependencies']) for (const [name, version] of Object.entries(state.managedEntries[kind])) if (pkg[kind]?.[name] !== version) throw new Error('Managed dependency changed');
-  reason = '생성 매니페스트의 변경·누락을 확인하세요. baseline을 직접 수정하지 마세요.';
-  for (const [file, entry] of Object.entries(state.files)) if (entry.policy === 'generated') {
-    const bytes = await readFile(path.join(app, file));
-    if (createHash('sha256').update(bytes).digest('hex') !== entry.hash) throw new Error('Generated file changed');
-  }
   for (stage of steps) {
     if (interrupted) throw new Error('Cancelled');
     reason = `${stage} 명령의 오류 출력을 확인하세요.`;

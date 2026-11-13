@@ -80,7 +80,7 @@ export function validateDeclaration(input) {
     identifier(value.registration, true);
     identifier(value.configFactory);
     safePath(value.configModule);
-    if (value.area !== 'backend' || !result.areas.includes(value.area) || !value.configModule.startsWith('src/backend/') || !value.configModule.endsWith('.ts') || !['http', 'ipc', 'tcp', 'udp', 'mqtt', 'socketIo'].includes(value.protocol)) fail('지원하지 않는 통신 선언입니다.');
+    if (value.area !== 'backend' || !result.areas.includes(value.area) || !value.configModule.startsWith('src/backend/') || !value.configModule.endsWith('.ts') || !['http', 'ipc'].includes(value.protocol)) fail('지원하지 않는 통신 선언입니다.');
   }
   if (!Array.isArray(result.ipcRoutes)) fail('ipcRoutes는 배열이어야 합니다.');
   for (const route of result.ipcRoutes) {

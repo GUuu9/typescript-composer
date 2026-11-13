@@ -5,7 +5,7 @@
 
 ## 지원 범위
 
-- web-phaser: React UI와 Phaser 게임 frontend를 함께 생성합니다. 기본 None이며 외부 HTTP Api를 명시적으로 선택할 수 있습니다. backend·preload는 포함하지 않습니다.
+- web-phaser: React UI와 Phaser 게임 frontend를 함께 생성합니다. 기본 통신은 없으며 외부 HTTP Api는 수동 연결합니다. backend·preload는 포함하지 않습니다.
 - electron-phaser: 기존 Electron Main·보안 창·preload와 Phaser frontend를 조립합니다. IPC는 필수 자동 시작이며 Main의 HTTP·TCP·UDP·MQTT·Socket.IO는 선택할 수 있습니다.
 - Phaser는 4.2.1로 고정하며 기존 TypeScript·Vite 버전은 유지합니다. React Provider·TSX·Vite plugin은 react-common에서 공유하고 게임 전용 코드는 Phaser base에 둡니다.
 - 게임 규칙·예제 자산·샘플 데이터·저장·물리 엔진·업무 Service는 기본 생성하지 않습니다.

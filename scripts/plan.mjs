@@ -113,13 +113,6 @@ export function assemble(components, selection) {
     communications.push(...component.communications);
     ipcRoutes.push(...component.ipcRoutes);
   }
-  if (selection.features.includes('logger')) {
-    for (let index = 0; index < registrations.length; index++) {
-      if (!communications.some(item => item.area === 'backend' && item.registration === registrations[index].name)) continue;
-      if (Object.hasOwn(registrations[index].dependencies, 'onError')) throw new Error('Logger onError dependency collision');
-      registrations[index] = { ...registrations[index], dependencies: { ...registrations[index].dependencies, onError: 'logger' } };
-    }
-  }
   const orderedRegistrations = orderDependencies(registrations, item => `${item.area}:${item.name}`, item => Object.values(item.dependencies).map(name => `${item.area}:${name}`));
   const communicationKeys = new Set();
   for (const communication of communications) {
@@ -151,14 +144,9 @@ export async function createPlan(componentsRoot, input) {
   for (const id of selection.entry.bases) inputs.push({ id, kind: 'base', directory: `01-base/${id}` });
   for (const id of selection.entry.targets) inputs.push({ id, kind: 'target', directory: `02-targets/${id}` });
   if (selection.configuration.communications.backend?.some(item => item.protocol === 'http')) inputs.push({ id: 'http', kind: 'feature', directory: '03-features/http' });
-  if (selection.configuration.communications.backend?.some(item => item.protocol === 'tcp')) inputs.push({ id: 'tcp', kind: 'feature', directory: '03-features/tcp' });
-  for (const [protocol, id] of [['udp', 'udp'], ['mqtt', 'mqtt'], ['socketIo', 'socket-io']]) {
-    if (selection.configuration.communications.backend?.some(item => item.protocol === protocol)) inputs.push({ id, kind: 'feature', directory: `03-features/${id}` });
-  }
   if (selection.configuration.communications.frontend?.some(item => item.protocol === 'http')) inputs.push({ id: 'http-client', kind: 'feature', directory: '03-features/http-client' });
   if (selection.configuration.communications.backend?.some(item => item.protocol === 'ipc')) inputs.push({ id: 'ipc', kind: 'feature', directory: '03-features/ipc' });
   if (selection.configuration.communications.frontend?.some(item => item.protocol === 'ipc')) inputs.push({ id: 'ipc-client', kind: 'feature', directory: '03-features/ipc-client' });
-  if (selection.features.includes('logger')) inputs.push({ id: 'logger', kind: 'feature', directory: '03-features/logger' });
   const components = await Promise.all(inputs.map(async input => {
     const component = await readComponent(path.join(componentsRoot, input.directory));
     if (component.id !== input.id || component.kind !== input.kind) throw new Error(`구성품 식별자가 일치하지 않습니다: ${input.directory}`);
@@ -180,15 +168,10 @@ export function generateManifest(registrations, area, communications = [], confi
     imports.push(`import { ${item.configFactory} as configFactory${index} } from ${JSON.stringify(module)};`);
     const selected = configuration.communications[area].find(entry => entry.protocol === item.protocol);
     const instanceIndex = entries.findIndex(entry => entry.name === item.registration);
-    preparation.push(item.protocol === 'ipc' ? `  const autoStart${index} = ${selected.autoStart};` : `  const autoStart${index} = readAutoStart('${item.protocol === 'socketIo' ? 'SOCKET_IO' : item.protocol.toUpperCase()}_AUTO_START', ${selected.autoStart}, ${configurations.find(entry => entry.id === configuration.id).required.includes(item.protocol)});`);
+    preparation.push(item.protocol === 'ipc' ? `  const autoStart${index} = ${selected.autoStart};` : `  const autoStart${index} = readAutoStart('${item.protocol.toUpperCase()}_AUTO_START', ${selected.autoStart}, ${configurations.find(entry => entry.id === configuration.id).required.includes(item.protocol)});`);
     preparation.push(`  const config${index} = autoStart${index} ? configFactory${index}() : undefined;`);
     communicationCalls.push(`    { name: '${item.registration}', autoStart: autoStart${index}, start: () => instance${instanceIndex}.start(config${index} ?? configFactory${index}()), stop: () => instance${instanceIndex}.stop(), dispose: () => instance${instanceIndex}.dispose()${item.failure ? `, failure: instance${instanceIndex}.failure` : ''} },`);
   });
-  const socketIndex = selectedCommunications.findIndex(item => item.protocol === 'socketIo');
-  if (socketIndex !== -1) {
-    const httpIndex = selectedCommunications.findIndex(item => item.protocol === 'http');
-    preparation.push(`  if (autoStart${socketIndex} && !autoStart${httpIndex}) throw new Error('Socket.IO automatic start requires HTTP automatic start');`);
-  }
   if (selectedCommunications.length) imports.push(`import { readAutoStart } from '../config/environment.config.ts';`);
   const calls = [];
   const instances = [];
@@ -199,15 +182,12 @@ export function generateManifest(registrations, area, communications = [], confi
     imports.push(`import { ${item.factory} as factory${index} } from ${JSON.stringify(module)};`);
     const dependencies = Object.entries(item.dependencies).map(([key, name]) => {
       const dependency = `instance${entries.findIndex(entry => entry.name === name)}`;
-      const communication = selectedCommunications.find(entry => entry.registration === item.name);
-      return key === 'onError' && name === 'logger' && communication
-        ? `onError: (error: unknown) => ${dependency}.report(error, { scope: '${communication.protocol}' })` : `${key}: ${dependency}`;
+      return `${key}: ${dependency}`;
     });
     calls.push(`  const instance${index} = factory${index}({ ${dependencies.join(', ')} }) satisfies object;`);
     instances.push(`${item.name}: instance${index}`);
     if (item.lifecycle.length) {
       const lifecycleDependencies = Object.values(item.dependencies).filter(name => entries.find(entry => entry.name === name)?.lifecycle.length);
-      if (area === 'backend' && item.name !== 'logger' && entries.some(entry => entry.name === 'logger')) lifecycleDependencies.push('logger');
       lifecycle.push(`    { name: '${item.name}', dependencies: ${JSON.stringify([...new Set(lifecycleDependencies)])}, ${item.lifecycle.map(method => `${method}: () => instance${index}.${method}()`).join(', ')} },`);
     }
   });

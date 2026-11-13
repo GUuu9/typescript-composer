@@ -37,9 +37,9 @@ test('all six configurations share required/default/forbidden protocol validatio
     assert.throws(() => normalizeSelection({ ...input, communications: ['unknown'] }), /허용/);
     if (!entry.implemented) assert.throws(() => requireImplemented(normalized), /현재/);
   }
-  assert.throws(() => normalizeSelection({ configuration: 'typescript-backend' }), /명시/);
+  assert.deepEqual(normalizeSelection({ configuration: 'typescript-backend' }).configuration.communications.backend, []);
   assert.throws(() => normalizeSelection({ ...none, communications: ['ipc'] }), /허용/);
-  assert.throws(() => requireImplemented(normalizeSelection({ ...none, features: ['storage'] })), /현재/);
+  assert.throws(() => requireImplemented(normalizeSelection({ ...none, features: ['storage'] })), /수동/);
   assert.throws(() => normalizeSelection({ configuration: 'backend-webui', delivery: 'separate' }), /제공/);
   assert.throws(() => normalizeSelection({ ...none, delivery: 'separate' }), /제공/);
 });
@@ -143,7 +143,7 @@ test('Node None plan and output are self-contained, existing paths preserved, st
   const state = JSON.parse(await readFile(path.join(app, '.composer/state.json')));
   assert.deepEqual(state.components, []);
   assert.deepEqual(state.pendingComponents.map(item => item.id), ['common', 'backend-common', 'node-backend', 'node']);
-  assert.equal(state.files['src/backend/core/features.manifest.ts'].policy, 'generated');
+  assert.equal(state.files['src/backend/core/di.ts'].policy, 'user');
   assert.ok((await readdir(app)).includes('.git'));
   await assert.rejects(generateProject({ parent, name: 'empty-app', selection: none, verify: false }), /EEXIST/);
   assert.deepEqual(JSON.parse(await readFile(path.join(app, '.composer/state.json'))), state);
@@ -151,66 +151,7 @@ test('Node None plan and output are self-contained, existing paths preserved, st
   assert.deepEqual((await readdir(parent)).sort(), ['empty-app']);
 });
 
-test('interactive flow asks configuration and features before the final project name; cancel writes nothing', async () => {
-  const questions = [];
-  const answers = ['1', 'none', 'none', 'my-app', 'yes'];
-  const input = await collectSelection(async question => { questions.push(question); return answers.shift(); }, () => {});
-  assert.equal(input.name, 'my-app');
-  assert.match(questions[0], /구성/);
-  assert.match(questions[2], /기능/);
-  assert.match(questions[3], /이름/);
-  const cancelled = ['1', 'none', 'none', 'my-app', 'n'];
-  assert.equal(await collectSelection(async () => cancelled.shift(), () => {}), null);
-  const electron = ['6', '', 'none', 'desktop', 'yes'];
-  assert.equal((await collectSelection(async () => electron.shift(), () => {})).selection.configuration, 'electron-phaser');
-  await assert.rejects(collectSelection(async () => '7', () => {}), /구성 번호/);
-  const unsupported = ['3', 'tcp'];
-  await assert.rejects(collectSelection(async () => unsupported.shift(), () => {}), /허용/);
-});
-
 test('application subprocesses do not inherit the Composer test-runner context', async () => {
   assert.ok(process.env.NODE_TEST_CONTEXT);
   await runProcess(process.execPath, ['--input-type=module', '-e', 'if (process.env.NODE_TEST_CONTEXT) process.exit(1)']);
-});
-
-test('HTTP selection, automatic start and the generated plan share validation', async () => {
-  const input = { configuration: 'typescript-backend', communications: ['http'], autoStart: { http: false } };
-  const normalized = normalizeSelection(input);
-  requireImplemented(normalized);
-  assert.deepEqual(normalized.configuration.communications.backend, [{ protocol: 'http', autoStart: false }]);
-  assert.throws(() => normalizeSelection({ ...input, autoStart: { http: 'false' } }), /자동 시작/);
-  assert.throws(() => normalizeSelection({ ...none, autoStart: { http: true } }), /자동 시작/);
-  assert.throws(() => normalizeSelection({ configuration: 'backend-webui', autoStart: { http: false } }), /필수/);
-  const plan = await createPlan(root, input);
-  assert.deepEqual(plan.components.map(item => item.id), ['common', 'backend-common', 'node-backend', 'node', 'http']);
-  assert.ok(plan.files.has('src/backend/communications/http/http.communication.ts'));
-  assert.equal(plan.packages.get('express').kind, 'dependencies');
-  assert.ok(plan.environment.has('HTTP_AUTO_START'));
-  assert.equal(plan.communications.length, 1);
-  assert.match(generateManifest(plan.registrations, 'backend', plan.communications, plan.configuration), /readAutoStart\('HTTP_AUTO_START', false, false\)/);
-});
-
-test('communications require a unique selected instance with separate disposal and valid config declaration', () => {
-  const registration = { name: 'http', area: 'backend', module: 'src/backend/http.ts', factory: 'createHttp', dependencies: {}, lifecycle: [] };
-  const communication = { registration: 'http', area: 'backend', configModule: 'src/backend/config/http.config.ts', configFactory: 'readHttpConfig', protocol: 'http' };
-  const httpSelection = normalizeSelection({ configuration: 'typescript-backend', communications: ['http'] });
-  const make = changes => component('http', { registrations: [registration], communications: [communication], ...changes });
-  assemble([make({})], httpSelection);
-  assert.throws(() => assemble([], httpSelection), /누락/);
-  assert.throws(() => assemble([make({})], selection), /선택 충돌/);
-  assert.throws(() => assemble([make({ registrations: [] })], httpSelection), /누락/);
-  assert.throws(() => assemble([make({ communications: [communication, communication] })], httpSelection), /중복/);
-  assert.throws(() => assemble([make({ registrations: [{ ...registration, lifecycle: ['dispose'] }] })], httpSelection), /수명/);
-  assert.throws(() => make({ communications: [{ ...communication, configModule: '../config.ts' }] }), /경로/);
-  assert.throws(() => make({ communications: [{ ...communication, configFactory: 'read();' }] }), /식별자/);
-});
-
-test('HTTP dialog asks automatic start before features and project name', async () => {
-  const questions = [];
-  const answers = ['1', 'http', 'n', 'none', 'http-app', 'yes'];
-  const input = await collectSelection(async question => { questions.push(question); return answers.shift(); }, () => {});
-  assert.equal(input.selection.autoStart.http, false);
-  assert.match(questions[2], /자동 시작/);
-  assert.match(questions[3], /기능/);
-  assert.match(questions[4], /이름/);
 });

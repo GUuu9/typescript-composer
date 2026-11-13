@@ -7,7 +7,7 @@
 
 typescript-backend의 선택 통신과 backend-webui·electron-app·electron-phaser의 추가 backend/Main 통신으로 제공합니다. 정적 웹·renderer용 MQTT·Socket.IO client는 이번 범위에 포함하지 않습니다. 업무 예제·기본 업무 Bridge·저장 기능·브로커는 생성하지 않습니다.
 
-원본은 03-features/udp·mqtt·socket-io에 두고 각 compose.json이 패키지·환경·등록·의존성을 소유합니다. 내부 식별자는 udp·mqtt·socketIo이며 파일은 udp.communication.ts·mqtt.communication.ts·socketIo.communication.ts, 설정은 udp.config.ts·mqtt.config.ts·socketIo.config.ts로 통일합니다. 클래스와 factory는 UdpCommunication/createUdpCommunication, MqttCommunication/createMqttCommunication, SocketIoCommunication/createSocketIoCommunication입니다.
+원본은 03-features/udp·mqtt·socket-io에 두고 각 기능 docs가 복사 파일·패키지·환경·DI 연결을 안내합니다. 내부 식별자는 udp·mqtt·socketIo이며 파일은 udp.communication.ts·mqtt.communication.ts·socketIo.communication.ts, 설정은 udp.config.ts·mqtt.config.ts·socketIo.config.ts로 통일합니다. 클래스와 factory는 UdpCommunication/createUdpCommunication, MqttCommunication/createMqttCommunication, SocketIoCommunication/createSocketIoCommunication입니다.
 
 공통 start(config)·stop()·dispose(), stopped·starting·running·stopping·disposed 상태, stopped에서만 Bridge 등록/해제, 동일 설정 중복 시작 방지, 설정 변경 전 stop, 부분 실패 자원 정리와 원인 보존을 유지합니다. 필요 시 시작 통신은 소켓·구독·재연결 타이머를 열지 않습니다. 업무 객체는 같은 DI 인스턴스를 공유하고 통신은 업무 Bridge를 import하지 않습니다.
 

@@ -1,79 +1,21 @@
-# Socket.IO 사용자 검증
+# socketIo 파트 단위 검증
 
-이번 구현의 설치·타입·단위·loopback·실제 연결·제한시간 검사는 에이전트가 실행하지 않았습니다. Node 24.22.1 이상, 패키지 레지스트리 접근, 별도 임시 앱을 사용하세요. 기존 project/ 앱은 검사 대상으로 사용하지 않습니다.
+전체 구성 조합을 검사하지 않고 이 기능의 독립 동작만 확인합니다. 결과를 받기 전에는 미검증입니다. 에이전트는 이 검사를 실행하지 않았습니다.
 
-## Composer 조립 검사
+## 준비
 
-Composer 저장소 루트에서 실행합니다.
+기존 project 앱 대신 별도 임시 경로의 새 기본 앱을 사용합니다. 기능 docs에 따라 필요한 소스·공통 의존 파일·패키지를 복사하고 test/backend/socketIo.test.ts도 같은 상대 위치로 복사합니다. 테스트는 실제 앱 DI와 분리된 대역·독립 객체를 사용하므로 업무 Usecase 연결이나 운영 .env가 필요하지 않습니다. Node 버전은 앱 .nvmrc를 따릅니다. 의존성이 이미 준비되어 있으면 설치를 반복하지 않습니다.
 
-```sh
-node --test test/composition.test.mjs test/communicationExpansion.test.mjs
-```
-
-기대 결과: 표준 6개 구성의 허용/금지·필수 통신, Socket.IO의 HTTP 단일 인스턴스·시작 순서와 SOCKET_IO_AUTO_START 접두사, MQTT 수동 시작 선택, Electron의 필수 IPC가 유지됩니다.
-
-## 임시 앱 생성과 설치·타입·기본 검사·빌드
-
-Composer 루트에서 실행합니다. 소스 출력·독립 Git 초기화만 수행합니다.
+## 실행
 
 ```sh
-node --input-type=module <<'JS'
-import { mkdtemp, realpath } from 'node:fs/promises';
-import os from 'node:os';
-import path from 'node:path';
-import { generateProject } from './scripts/generate.mjs';
-const parent = await realpath(await mkdtemp(path.join(os.tmpdir(), 'composer-socketIo-')));
-const { app } = await generateProject({ parent, name: 'validation', selection: { configuration: 'typescript-backend', communications: ['socketIo'] }, verify: false });
-console.log(app);
-JS
+# 실행 위치: 새 임시 앱 루트 터미널
+# 적용: 이 기능의 단위 검사만 실행합니다. 전체 npm test·verify·build를 반복하지 않습니다.
+node --test --test-name-pattern="^Socket.IO config" test/backend/socketIo.test.ts
 ```
 
-출력된 앱 경로로 이동해 다음을 실행합니다.
+확인 범위: 설정 토큰 검증. 공유 HTTP·polling·WebSocket 실행은 제외합니다. 실패하면 해당 테스트와 직접 의존하는 코드만 수정하고 그 검사만 다시 실행합니다. 단위 검사 통과를 실제 앱 연결·외부 통신·배포 검증으로 설명하지 않습니다.
 
-```sh
-npm run verify
-```
+## 제외 범위
 
-기대 결과는 설치 → 전체 check → 기본 test → build 통과와 상태 활성화입니다. MQTT의 외부 브로커 검사는 기본 test에서 제외됩니다. 기본 검사 통과는 실제 외부 연결·부하·GUI 성공을 의미하지 않습니다.
-
-실패하면 소스·package-lock·.composer/diagnostic.json을 보존하고 실패 단계 원인을 확인한 뒤 `npm run verify`로 재시도합니다. state나 원본 해시는 직접 고치지 않습니다. 실제 .env는 사용자가 선택 키만 작성하고 비밀값은 커밋하지 않습니다.
-
-## 실제 실행과 추가 확인
-
-앱 경로에서 설정을 작성한 뒤 `npm start`로 빌드 결과, `npm run dev`로 개발 실행을 확인합니다. 정상 중단·Ctrl+C 이후 포트/구독·타이머·자식 프로세스가 남지 않아야 합니다. 아래 확인은 별도로 직접 진행하고 결과를 기록합니다.
-
-HTTP_ALLOWED_ORIGINS=http://localhost:5173을 사용자 .env에 지정하고 `npm start`를 실행합니다. 기본 HTTP_PORT는 3000이며 변경했다면 아래 client 주소도 바꿉니다. 토큰을 설정한 서버에는 별도 client 터미널에서도 같은 SOCKET_IO_AUTH_TOKEN을 비밀 환경 변수로 지정합니다. 외부 bind·Origin 없는 client에는 토큰이 필수입니다.
-
-별도 터미널에서 새 임시 client만 설치해 실행합니다. 생성 앱의 패키지·lock은 변경하지 않습니다.
-
-```sh
-taskSocketClientDir="$(mktemp -d)"
-cd "$taskSocketClientDir"
-npm init -y
-npm install --save-exact socket.io-client@4.8.4
-node --input-type=module <<'JS'
-import assert from 'node:assert/strict';
-import { io } from 'socket.io-client';
-for (const transport of ['polling', 'websocket']) {
-  const socket = io('http://127.0.0.1:3000', {
-    transports: [transport], reconnection: false, timeout: 5000,
-    extraHeaders: { Origin: 'http://localhost:5173' },
-    auth: process.env.SOCKET_IO_AUTH_TOKEN ? { token: process.env.SOCKET_IO_AUTH_TOKEN } : {},
-  });
-  try {
-    await new Promise((resolve, reject) => { socket.once('connect', resolve); socket.once('connect_error', reject); });
-    const reply = await socket.timeout(5000).emitWithAck('request', { route: 'missingRoute', payload: null });
-    assert.equal(reply.ok, false); assert.equal(reply.error.code, 'notFound');
-    console.log(transport, 'connected; missing route rejected');
-  } finally { socket.disconnect(); }
-}
-JS
-```
-
-기대 결과: 같은 HTTP 포트로 polling/WebSocket이 각각 연결되고 미등록 route는 안전한 notFound ack를 반환합니다. 기본 socketIo.test.ts는 허용/거부 Origin·HTTP stop 보호·Socket.IO 중단 후 HTTP 404 유지·각각 재시작을 검사합니다. 해당 검사만 다시 확인할 때는 앱 경로에서 `node --test test/backend/socketIo.test.ts`를 실행합니다.
-
-Origin을 허용 목록과 다르게 바꾸면 양쪽 transport에서 연결이 거부되어야 합니다. 토큰 설정 시 누락·잘못된 토큰도 거부되어야 합니다. Origin 헤더를 제거하면 토큰 없는 연결은 실패해야 합니다. auth token을 query/header로 옮겨 우회할 수 없어야 합니다.
-
-사용자 임시 Bridge에서 응답·예외·잘못된 JSON 결과·보류 작업을 준비하고 64 KiB·소켓당 1개·전역 64개·30초 timeout ack를 확인합니다. 실제 업무 완료 전 처리 자리는 반환되지 않아야 합니다. 같은 소켓의 재요청은 busy, 내부 오류에는 스택·비밀값이 없어야 합니다. ack 없는 request는 연결을 종료합니다.
-
-stop 5초 초과는 실패로 전달하고 늦은 결과는 ack하지 않아야 합니다. Socket.IO 중단 후 일반 HTTP와 정적 웹이 별도 연결에서 계속 응답하고, 다시 start했을 때 중복 리스너가 없어야 합니다. 같은 객체가 Bridge와 Service에 공유되는지, Main IPC와 HTTP·TCP·UDP·MQTT를 함께 선택한 부분 시작 실패가 모두 역순 정리되는지도 새 임시 앱에서 확인합니다.
+전체 조합 생성·패키지 재설치·전체 check/test/build·외부 연결·loopback 통신·긴 제한시간·파일 회전·실기기/GUI는 기본 검증에 포함하지 않습니다. 해당 부분에서 실제 문제가 보고되거나 명시적 요청이 있을 때만 관련 최소 재현 검사를 별도로 수행합니다. 기존 테스트 파일에 다른 검사가 남아 있어도 이 문서의 실행 범위에는 포함하지 않습니다.

@@ -66,9 +66,17 @@ export async function generateProject({ name, selection, componentsRoot = path.j
   const scripts = Object.fromEntries(plan.scripts);
   const pkg = { name, version: '0.0.0', private: true, type: 'module', engines: { node: '>=24.22.1' }, scripts, dependencies, devDependencies };
   for (const area of plan.areas.filter(area => ['backend', 'frontend'].includes(area))) {
-    const manifestPath = area === 'frontend' ? 'src/frontend/core/di/features.manifest.ts' : 'src/backend/core/features.manifest.ts';
-    if (plan.files.has(manifestPath)) throw new Error(`생성 매니페스트 중복 제공: ${manifestPath}`);
-    plan.files.set(manifestPath, { bytes: Buffer.from(generateManifest(plan.registrations, area, plan.communications, plan.configuration, plan.ipcRoutes)), owner: area === 'frontend' ? plan.components.find(item => item.kind === 'base' && item.areas.includes('frontend')).id : plan.areas.includes('preload') ? 'electron-backend' : 'node-backend', policy: 'generated' });
+    const diPath = area === 'frontend' ? 'src/frontend/core/di/di.ts' : 'src/backend/core/di.ts';
+    const entry = plan.files.get(diPath);
+    if (!entry) throw new Error(`DI 파일 누락: ${diPath}`);
+    const initial = generateManifest(plan.registrations, area, plan.communications, plan.configuration, plan.ipcRoutes)
+      .replace(/import type \{ LifecycleEntry \} from [^;]+;\n/, '')
+      .replace('export function createFeatures()', 'function createInitialFeatures()');
+    const source = entry.bytes.toString()
+      .replace(/import \{ createFeatures \} from ['"]\.\/features\.manifest\.ts['"];\n/, '')
+      .replaceAll('createFeatures()', 'createInitialFeatures()');
+    entry.bytes = Buffer.from(initial + '\n' + source);
+    entry.policy = 'user';
   }
   if (plan.areas.includes('preload')) {
     if (plan.files.has('src/shared/ipcRoutes.manifest.ts')) throw new Error('생성 IPC 매니페스트 중복 제공');
@@ -77,16 +85,10 @@ export async function generateProject({ name, selection, componentsRoot = path.j
   plan.files.set('package.json', { bytes: Buffer.from(JSON.stringify(pkg, null, 2) + '\n'), owner: 'common', policy: 'user' });
   const environmentExample = '# 공유용 설정 양식입니다. 필요한 경우 .env로 복사해 실제 값을 작성하세요.\n# 실제 비밀값은 넣지 마세요. 앱은 이 파일을 자동 로드하지 않습니다.\n\n';
   plan.files.set('.env.example', { bytes: Buffer.from(environmentExample + [...plan.environment].map(([key, item]) => `# ${item.description} (${item.required ? '필수' : '선택'}, ${item.secret ? '비밀값' : '공개값'})\n${key}=\n`).join('\n')), owner: 'common', policy: 'user' });
-  if (plan.components.some(component => component.id === 'logger')) {
-    const ignore = plan.files.get('.gitignore');
-    if (!ignore) throw new Error('Logger requires the project .gitignore');
-    ignore.bytes = Buffer.from(ignore.bytes.toString() + '\n# Selected logger output\n/logs/\n');
-  }
   const readme = plan.files.get('README.md');
-  const featureSummary = plan.components.filter(component => component.id === 'logger').map(component => component.id).join(', ') || 'None';
   const communicationSummary = Object.entries(plan.configuration.communications).flatMap(([area, entries]) => entries.map(entry => `${area}/${entry.protocol} (${area === 'frontend' ? '발신 Api' : `자동 시작 기본 ${entry.autoStart}`})`)).join(', ') || 'None';
   const packageSummary = [...plan.packages].map(([name, entry]) => `- ${name}: ${entry.version} (${entry.kind})`).join('\n');
-  if (readme) readme.bytes = Buffer.from(readme.bytes.toString().replace('\n', `\n\n생성 구성: ${plan.configuration.id}${plan.configuration.delivery ? ` / ${plan.configuration.delivery}` : ''}. 통신: ${communicationSummary}. 추가 기능: ${featureSummary}. 선택 Node 통신의 자동 시작 기본값은 .env로 재정의할 수 있습니다. 필수 통신과 IPC 보안은 완화하지 않습니다.\n\n선택 패키지:\n\n${packageSummary}\n`));
+  if (readme) readme.bytes = Buffer.from(readme.bytes.toString().replace('\n', `\n\n생성 구성: ${plan.configuration.id}${plan.configuration.delivery ? ` / ${plan.configuration.delivery}` : ''}. 통신: ${communicationSummary}. 추가 기능은 docs의 수동 연결 안내를 따릅니다. 필수 통신과 IPC 보안은 완화하지 않습니다.\n\n선택 패키지:\n\n${packageSummary}\n`));
   const state = {
     schemaVersion: 1, composerVersion: '0.0.0', configuration: plan.configuration,
     components: [],

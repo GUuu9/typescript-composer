@@ -1,6 +1,8 @@
 <!-- version: v0.0.0 -->
 # TypeScript Composer 작업 지침
 
+현재 생성 범위: Compose는 표준 구성과 필수 연결만 생성합니다. 추가 통신·Service 선택과 자동 추가는 제공하지 않습니다. 기능은 필요한 파일을 복사하고 패키지·환경·DI를 수동 연결합니다. feature add는 구현 대상에서 제외합니다. 기준은 docs/contracts/manual-features-contract.md와 components/03-features/README.md를 따릅니다.
+
 이 문서는 TypeScript Composer v0.0.0의 유지보수 규칙입니다. 표준 6개 구성·통신·선택 logger의 제공 범위는 README를 따릅니다. 미검증 기록은 update.md에 보존하며 미구현 기능을 제공 완료로 설명하지 않습니다.
 
 ## 작업 범위와 보호
@@ -11,7 +13,7 @@ project/의 기존 앱·독립 Git·데이터·설정·.composer 상태는 수�
 
 ## 유지보수와 검사
 
-역추출·feature add와 보호/복구·추가 기능은 별도 요청 시 진행하며 현재 필수 후속 작업이 아닙니다. 사용 중 문제 보고가 있으면 관련 범위에서 재현·수정합니다.
+역추출과 추가 기능은 별도 요청 시 진행합니다. feature add와 자동 보호/복구 명령은 구현하지 않습니다. 사용 중 문제 보고가 있으면 관련 범위에서 재현·수정합니다.
 
 기본 확인은 짧은 구문·diff 검사입니다. 설치·단위·loopback·시간 제한·전체 조합·GUI 검사는 자동 실행하지 않으며 사용자가 명시적으로 요청한 범위에서 수행합니다. 필요한 사용자 검사에는 경로·명령·선행 조건·목적을 안내합니다. 실제 실행하지 않은 검사는 미검증으로 기록하며 과거 통과 결과를 이번 검증으로 표현하지 않습니다. 통과한 검사는 관련 변경·실패·남은 의문이 없으면 반복하지 않습니다.
 
@@ -25,7 +27,7 @@ HTTP의 파일·등록·요청 제한·종료 정책은 [HTTP 계약](docs/contr
 
 TCP의 승인된 framing·인증·제한·종료·치명적 장애 전달 계약은 [TCP 계약](docs/contracts/tcp-contract.md)을 따릅니다. UDP·MQTT·Socket.IO의 구현·검증 범위는 통신 확장 계약과 update.md를 따릅니다.
 
-승인된 선언·소유권·수명·상태 계약은 [공통 조립 계약](docs/contracts/composition-contract.md)을 따릅니다. npm run compose는 인자 없이 시작해 구성·기능을 질문하고 프로젝트 이름을 마지막으로 입력받습니다. 새 앱의 npm run verify는 소스를 재출력하지 않고 install/check/test/build 전체를 반복하며 성공 후에만 구성을 활성화합니다.
+승인된 선언·소유권·수명·상태 계약은 [공통 조립 계약](docs/contracts/composition-contract.md)을 따릅니다. npm run compose는 인자 없이 시작해 구성을 질문하고 프로젝트 이름을 마지막으로 입력받습니다. 새 앱의 npm run verify는 소스를 재출력하지 않고 install/check/test/build 전체를 반복하며 성공 후에만 구성을 활성화합니다.
 
 ## 구성 선택과 조립
 
@@ -33,12 +35,12 @@ TCP의 승인된 framing·인증·제한·종료·치명적 장애 전달 계약
 
 | 구성 | 필수·선택 연결 |
 | :--- | :--- |
-| typescript-backend | None 또는 HTTP·TCP·UDP·MQTT·Socket.IO 중 명시적 선택. IPC 제외 |
-| web-app·web-phaser | 기본 None, 외부 HTTP 허용. Node 통신·Main IPC 제외 |
-| backend-webui | HTTP 필수·통합 제공 고정. 분리는 backend와 웹 프로젝트를 각각 생성. backend에 추가 Node 통신 허용 |
-| electron-app·electron-phaser | Main–renderer IPC 필수. Main에 추가 Node 통신 허용 |
+| typescript-backend | 통신 없이 생성. 추가 통신은 수동 연결 |
+| web-app·web-phaser | 통신 없이 생성. 외부 HTTP Api는 수동 연결 |
+| backend-webui | HTTP 필수·통합 제공 고정. 분리는 backend와 웹 프로젝트를 각각 생성. 추가 Node 통신은 수동 연결 |
+| electron-app·electron-phaser | Main–renderer IPC 필수. 추가 Node 통신은 수동 연결 |
 
-None과 통신 동시 명시는 거부합니다. 필수 통신은 제거하지 못하고 기본 자동 시작합니다. Socket.IO의 HTTP 의존 등 필수 항목은 중복 인스턴스 없이 포함합니다. Service·util은 실행 영역·프레임워크·선행 조건으로 제한합니다. 저장은 명시 선택입니다. 미지원 조합·누락·순환·패키지/환경/등록 충돌은 출력 전에 거부합니다.
+None과 통신 동시 명시는 거부합니다. 필수 통신은 제거하지 못하고 기본 자동 시작합니다. 필수 연결은 중복 인스턴스 없이 포함합니다. 수동 Socket.IO 연결 시에도 HTTP 인스턴스를 공유합니다. Service·util은 실행 영역·프레임워크·선행 조건으로 제한합니다. 저장은 명시 선택입니다. 미지원 조합·누락·순환·패키지/환경/등록 충돌은 출력 전에 거부합니다.
 
 구성품 원본은 components/00-common·01-base·02-targets·03-features로 나누고 공통 → 선택 base → target → feature 순서로 계획합니다. 00-common은 project·backend·frontend와 React 공용 react 각각의 compose.json·files 구조로 통일하고 선택한 실행 영역의 공통만 포함합니다. target은 선언한 연결 파일만 교체하며 feature의 무조건 덮어쓰기를 금지합니다. backend 전체를 복사하고 정적 웹에서 삭제하는 방식을 쓰지 않습니다. compose.json이 패키지·명령·의존성·등록을 소유합니다.
 
@@ -48,14 +50,14 @@ None과 통신 동시 명시는 거부합니다. 필수 통신은 제거하지 �
 
 | 위치 | 책임·파일 접미사 |
 | :--- | :--- |
-| backend/core | 메인 di.ts·features.manifest.ts. lifecycle은 수명, security는 신뢰 검증 |
+| backend/core | 메인 di.ts. lifecycle은 수명, security는 신뢰 검증 |
 | backend/communications/<protocol> | 연결·수신·전송·구독·재연결·종료. 구체 파일명은 계약 확정 후 작성 |
 | backend/bridge/<feature> | 업무 입력 검증·Usecase 호출·전송 응답. *.http.bridge.ts·*.ipc.bridge.ts 등 |
 | backend/usecases/<feature> | 업무 순서. *.usecase.ts |
 | backend/services/<feature> | 공유 기능·외부 I/O. *.service.ts |
 | backend/repository/<feature> | 데이터 조회·저장 의미. *.repository.ts |
 | backend/utils·config | *.util.ts·*.config.ts·공개 .json |
-| frontend/core/di | di.ts·diProvider.tsx·features.manifest.ts·수명·observable |
+| frontend/core/di | di.ts·diProvider.tsx·수명·observable |
 | frontend/scenes/<feature> | *.page.tsx·*.page.css·*.viewmodel.ts·*.model.ts·Phaser *.scene.ts |
 | frontend/services/<feature> | 기능 처리·payload 검증. *.service.ts·*.model.ts |
 | frontend/apis | 공통 api.ts·추가 *.api.ts·타입 선언 *.d.ts |
@@ -100,15 +102,9 @@ dev는 개발 실행, start는 빌드 결과, check/test/build는 전체 선택 
 
 기본 검증은 운영 서버·사용자 데이터 없이 수행합니다. 생성·설치·check/test/build·필수 설정·실제 외부 연결 결과를 구분합니다. 신규 생성 실패·취소 시 소스·lock·진단을 보존하고 실패 단계와 재실행 방법을 안내하며 비밀값을 로그에 남기지 않습니다.
 
-## 사후 추가와 파일 보호
+## 수동 기능 적용과 파일 보호
 
-새 앱은 project/<name>에 생성하고 추가 원본은 부모 components/로 고정합니다. 앱 실행·빌드는 복사본만 사용합니다. 원본 누락은 변경 전 중단·예상 경로 안내로 처리하며 원격 탐색·자동 재연결·고정 릴리스 복원은 기본 지원하지 않습니다.
-
-관련 구성품의 영역·스키마·의존성·실제 충돌을 검사하고 무관한 전체 원본 변경만으로 막지 않습니다. 사용자 di·업무 코드·문서를 재작성하지 않습니다. 생성 매니페스트의 사용자 변경은 충돌로 처리하고 package.json·환경 예시는 새 항목만 병합합니다. 새 추가가 기존 기능 전체 갱신으로 이어지지 않게 합니다.
-
-충돌은 변경 전 중단하고 파일·패키지·등록 위치·순서·검증 방법을 안내합니다. 수동 적용 후 필수 파일·등록·호환성·설치·검사를 확인하고 성공 시에만 활성 상태와 관련 기준값을 기록합니다. 실패 시 기존 state와 사용자 수동 작업을 보존합니다. 자동 적용 실패는 변경 소스·package/lock·state를 복구하며 node_modules·산출물·외부 설치 부작용은 복구 범위 밖입니다.
-
-원본 해시나 state를 직접 바꿔 우회하지 않습니다. 추가 명령은 루트 feature add <app> <item>, 앱 feature add <item> 체계로 구현하고 compose add 별칭을 만들지 않습니다. 새 하위 명령은 계약과 검증을 갖춘 뒤 안내합니다.
+추가 통신·Service는 필요한 소스와 사용 문서를 제공하고 사용자가 패키지·환경·앱 DI를 직접 연결합니다. feature add·자동 병합·복구·수동 적용 확인 명령은 구현하지 않습니다. 최초 생성 시 필수 연결을 di.ts에 출력하고 이후 DI는 사용자 소유입니다. 새로운 기능은 Composer 선택표나 생성 매니페스트 코드를 수정하지 않고 자체 소스와 수동 연결 문서로 추가합니다.
 
 ## Git 저장과 변경 이력
 
@@ -132,4 +128,8 @@ UDP·MQTT·Socket.IO의 송수신·인증·공유 HTTP·중단·검증 문서 �
 
 선택 logger의 영역·비밀값·파일 보존·큐·수명·통신 onError 연결은 [Logger 계약](docs/contracts/logger-contract.md)을 따릅니다.
 
-선택 Service·util의 현재 구축 범위는 logger로 한정합니다. 추가 Service·util 목록을 미리 채우는 작업은 현재 완료 조건에 포함하지 않습니다. 이후 사용자가 실제 프로젝트에서 필요성과 재사용 가치를 확인한 항목을 요청할 때 하나씩 계약·구성품·검증 문서로 추가합니다. 역추출과 feature add(충돌 보호·실패 복구·수동 적용 확인 포함)는 사용자의 별도 요청이 있을 때 진행하며 현재 완료 조건에서 제외합니다. 기존 계약은 향후 구현 기준으로 보존하며 해당 기능이 구현되었다고 안내하지 않습니다. 별도 전체 조합·기능 검증은 현재 필수 후속 작업으로 두지 않습니다. 사용 중 문제가 발생해 사용자가 요청하면 관련 범위에서 재현·수정하고 필요한 최소 검사를 수행합니다. 기존 미실행·미검증 기록과 검증 문서는 보존하며 검증 완료로 바꾸지 않습니다.
+선택 Service·util의 현재 구축 범위는 logger로 한정합니다. 추가 Service·util 목록을 미리 채우는 작업은 현재 완료 조건에 포함하지 않습니다. 이후 사용자가 실제 프로젝트에서 필요성과 재사용 가치를 확인한 항목을 요청할 때 하나씩 계약·구성품·검증 문서로 추가합니다. 역추출은 별도 요청 시 진행합니다. feature add·자동 충돌 병합·복구·수동 적용 확인 명령은 구현하지 않습니다. 기존 계약은 향후 구현 기준으로 보존하며 해당 기능이 구현되었다고 안내하지 않습니다. 별도 전체 조합·기능 검증은 현재 필수 후속 작업으로 두지 않습니다. 사용 중 문제가 발생해 사용자가 요청하면 관련 범위에서 재현·수정하고 필요한 최소 검사를 수행합니다. 기존 미실행·미검증 기록과 검증 문서는 보존하며 검증 완료로 바꾸지 않습니다.
+
+기능 사용 문서에서 파일에 작성할 코드는 fenced code block으로 표시하고 첫 주석에 파일 경로·추가/교체 위치를 명시합니다. 명령은 실행 경로를 표시하며 부분 예시와 전체 파일을 구분합니다. JSON 주석 안내는 jsonc 예시에서만 사용하고 실제 JSON에는 주석을 넣지 않습니다.
+
+추가 기능의 객체는 createDi 내부에서 지역 변수로 생성하고 필요한 Usecase·Service·Bridge 생성자에 직접 주입합니다. 수명이 필요한 객체만 같은 수명 관리자에 등록합니다. 추가 기능 때문에 di.instances를 확장하거나 업무 객체에 DI 전체를 전달하지 않습니다. 기존 필수 HTTP·IPC·window·Api의 내부 연결은 유지합니다.

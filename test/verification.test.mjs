@@ -43,10 +43,10 @@ test('failed verification preserves source/lock/state; retry activates only afte
   assert.equal(active.components.length, 4);
   assert.equal(active.files['src/backend/index.ts'].hash, JSON.parse(initial).files['src/backend/index.ts'].hash);
   const activeBytes = await readFile(stateFile, 'utf8');
-  await writeFile(path.join(app, 'src/backend/core/features.manifest.ts'), '// user changed generated file\n');
+  await writeFile(path.join(app, 'src/backend/core/di.ts'), '// user changed generated file\n');
   const conflict = await run(app, bin);
-  assert.equal(conflict.code, 1);
-  assert.doesNotMatch(conflict.output, /\[install\]/);
+  assert.equal(conflict.code, 0);
+  assert.match(conflict.output, /\[install\]/);
   assert.equal(await readFile(stateFile, 'utf8'), activeBytes);
 });
 

@@ -72,7 +72,6 @@ async function assets(directory) {
 
 const cases = [
   { name: 'react-none', selection: { configuration: 'web-app', communications: ['none'] } },
-  { name: 'react-http', selection: { configuration: 'web-app', communications: ['http'] } },
   { name: 'web-integrated', selection: { configuration: 'backend-webui' } },
 ];
 test('web generation and runtime matrix', { concurrency: 4, timeout: 300000 }, async t => {

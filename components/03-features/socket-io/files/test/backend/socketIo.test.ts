@@ -1,3 +1,4 @@
+import { validateSocketIoConfig } from '../../src/backend/config/socketIo.config.ts';
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { HttpCommunication } from '../../src/backend/communications/http/http.communication.ts';
@@ -20,4 +21,11 @@ test('Socket.IO shares HTTP, rejects origins, detaches and restarts without clos
     await socketIo.start({}); await socketIo.stop(); await http.stop();
     await http.start({ host: '127.0.0.1', port: 0 }); await socketIo.start({ authToken: 'x'.repeat(32) });
   } finally { await socketIo.dispose(); await http.dispose(); }
+});
+
+test('Socket.IO config accepts empty settings and rejects invalid tokens', () => {
+  assert.deepEqual(validateSocketIoConfig({}), {});
+  const authToken = 'a'.repeat(32);
+  assert.deepEqual(validateSocketIoConfig({ authToken }), { authToken });
+  assert.throws(() => validateSocketIoConfig({ authToken: 'short' }));
 });

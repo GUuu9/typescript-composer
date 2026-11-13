@@ -6,8 +6,8 @@
 ## 범위·선택·소유권
 
 - 공개 기능 식별자는 logger입니다. typescript-backend·backend-webui·electron-app·electron-phaser의 backend/Main에서 선택하며 웹 단독·renderer에서는 제공하지 않습니다. frontend 로그의 HTTP/IPC 전송과 전역 예외 가로채기는 포함하지 않습니다.
-- npm run compose는 선택한 구성에 맞는 기능 목록을 보여주고 logger 또는 none을 선택받습니다. 프로젝트 이름은 기존대로 마지막에 받습니다. 미선택 시 패키지·파일·등록·환경 키를 추가하지 않습니다.
-- 원본은 components/03-features/logger입니다. compose.json이 backend 영역·backend-common 의존·logger 등록·initialize/dispose 수명을 소유합니다. 외부 패키지는 추가하지 않습니다.
+- logger는 자동 선택하지 않습니다. files/ 소스를 복사하고 패키지·환경·DI·README 기록을 docs/logger.md에 따라 직접 적용합니다.
+- 원본은 components/03-features/logger/files입니다. 외부 패키지 없이 사용자 DI에서 factory와 initialize/dispose를 직접 연결합니다.
 - 앱 파일은 backend/services/logger/logger.service.ts·logger.model.ts, backend/config/logger.config.ts, test/backend/logger.test.ts, docs/logger.md·docs/validation/loggerValidation.md입니다. LoggerService와 createLoggerService(deps)를 같은 Service 파일에 둡니다. 순수 로그 정규화·비밀값 제거가 별도 파일을 필요로 할 때만 소유 기능의 util로 분리합니다.
 
 ## API·기록 내용
@@ -20,7 +20,7 @@
 ## 통신·DI 연결
 
 - 같은 logger 인스턴스를 메인 DI에 한 번 등록하고 필요한 Service에는 logger의 필요한 메서드만 주입합니다. 업무 객체가 di 전체를 참조하지 않습니다.
-- logger 선택 시 생성 계획이 선택 통신의 onError에 logger 오류 보고 계약을 연결합니다. HTTP·TCP·UDP·MQTT·Socket.IO·IPC의 기존 함수형 onError도 계속 허용합니다. 생성자는 로그 파일을 열거나 통신을 시작하지 않습니다.
+- 앱 DI가 통신 factory의 onError에 같은 logger.report를 직접 연결합니다. HTTP·TCP·UDP·MQTT·Socket.IO·IPC의 기존 함수형 onError도 계속 허용합니다. 생성자는 로그 파일을 열거나 통신을 시작하지 않습니다.
 - 통신 콜백용 report(error)는 내부에서 error 기록을 요청하고 실패를 처리합니다. 실패한 기록은 일반화한 stderr 안내로 알리고 flush/dispose에서도 원인을 보존해 실패를 반환합니다. 처리되지 않은 Promise rejection이나 로깅 재귀를 만들지 않습니다. 통신의 원래 요청 실패·failure 전달을 로깅 성공 여부로 바꾸지 않습니다.
 - logger.initialize → 나머지 Service 준비 → 통신 시작 순서를 따릅니다. 종료는 통신 해제와 업무 자원 해제 후 logger.dispose에서 flush하고 파일을 닫습니다. 종료 중 다른 Service가 마지막 로그를 기록할 수 있도록 logger 수명 순서를 명시합니다. 자동 uncaughtException·unhandledRejection 처리나 프로세스 강제 종료는 추가하지 않습니다.
 

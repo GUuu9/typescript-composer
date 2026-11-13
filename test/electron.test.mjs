@@ -7,21 +7,14 @@ import os from 'node:os';
 import { createPlan } from '../scripts/plan.mjs';
 import { generateProject } from '../scripts/generate.mjs';
 const componentsRoot = new URL('../components/', import.meta.url).pathname;
-test('Electron renderer plans keep windows secure and combine required IPC with optional HTTP', async () => {
- const app = await createPlan(componentsRoot, { configuration: 'electron-app', communications: ['http'], autoStart: { http: false } });
- assert.match(app.files.get('src/backend/core/window.service.ts').bytes.toString(), /sandbox: true/);
- assert.equal(app.files.get('scripts/webTarget.mjs').previousOwner, 'frontend');
- assert.deepEqual(app.configuration.communications.backend.map(item => item.protocol), ['http', 'ipc']);
- assert.equal(app.registrations.filter(item => item.name === 'window').length, 1);
-});
-const parent = await realpath(await mkdtemp(path.join(os.tmpdir(), 'composer-electron-unit-')));
-const { app } = await generateProject({ parent, name: 'desktop', selection: { configuration: 'electron-app' }, verify: false });
+const parent = await realpath(await mkdtemp(path.join(os.tmpdir(), 'composer-electron-')));
+const { app } = await generateProject({ parent, name: 'app', selection: { configuration: 'electron-app' }, verify: false });
 test('Electron generated manifests own routes and mandatory IPC ignores environment overrides', async () => {
  const state = JSON.parse(await readFile(path.join(app, '.composer/state.json'), 'utf8'));
  assert.equal(state.files['src/shared/ipcRoutes.manifest.ts'].policy, 'generated');
- const manifest = await readFile(path.join(app, 'src/backend/core/features.manifest.ts'), 'utf8');
+ const manifest = await readFile(path.join(app, 'src/backend/core/di.ts'), 'utf8');
  assert.match(manifest, /const autoStart0 = true/); assert.doesNotMatch(manifest, /readAutoStart\('IPC/);
- assert.equal(state.files['src/backend/core/features.manifest.ts'].owner, 'electron-backend');
+ assert.equal(state.files['src/backend/core/di.ts'].owner, 'electron-backend');
 });
 await import(pathToFileURL(path.join(app, 'test/backend/lifecycle.test.ts')));
 await import(pathToFileURL(path.join(app, 'test/frontend/di.test.ts')));
