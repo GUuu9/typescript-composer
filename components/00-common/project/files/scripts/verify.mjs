@@ -1,3 +1,6 @@
+// 관리 파일: 추가 기능 연결을 위해 임의 수정하지 마세요.
+// 상태 검증·실패 보존·활성화 검사를 제거해 오류를 우회하지 마세요.
+// 기능은 di.ts·package.json·.env.example에서 연결하고, 이 파일의 결함 수정은 별도 유지보수로 진행합니다.
 import { readFile, writeFile, rename, unlink, lstat } from 'node:fs/promises';
 import { spawn } from 'node:child_process';
 import { randomUUID } from 'node:crypto';

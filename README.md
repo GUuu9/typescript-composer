@@ -77,3 +77,5 @@ npm run workspace
 project/의 실제 하위 폴더 번호를 쉼표로 선택하면 Composer와 선택 앱을 함께 여는 typescript-composer.local.code-workspace를 생성합니다. Enter는 취소이며 기존 파일 교체는 확인 후 수행합니다. VS Code에서 결과 파일을 여세요. 폴더의 Git 저장소 탐색은 VS Code가 수행합니다. 앱 내부·Git·설정은 변경하지 않고 workspace는 Git에서 제외됩니다. 자세한 기준은 [workspace 계약](docs/contracts/workspace-contract.md)을 따릅니다.
 
 단위 검사는 Composer 루트의 `node --test test/workspace.test.mjs`이며 임시 폴더의 목록·선택·생성·교체 보호만 확인합니다. 에이전트는 이 검사를 실행하지 않았습니다.
+
+생성 앱에는 [관리 파일 안내 원본](components/00-common/project/files/docs/managedFiles.md)을 docs/managedFiles.md로 포함합니다. 각 코드 블록의 주석에 임의 수정 금지 대상과 정상 갱신 방법을 안내하며 사용자 DI·업무 코드는 수정 대상으로 구분합니다.

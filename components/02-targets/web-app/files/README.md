@@ -16,3 +16,9 @@ Node 버전은 .nvmrc를 따릅니다. .env.example를 .env로 복사해 선택 
 폴더 역할·수명·데이터 흐름은 docs/frontend.md를 따릅니다. 자동 기능 추가는 제공하지 않으며 state·원본 해시를 수정해 검사를 우회하지 않습니다. 사용자 DI는 직접 수정합니다. 사용자 DI·업무·문서는 처음 생성 후 사용자 소유입니다.
 
 Composer와 독립 Git 저장소입니다. 소스·테스트·문서·설정·.env.example·package-lock.json·.composer/state.json·.gitkeep을 저장합니다. 실제 .env·키·토큰·node_modules·dist는 제외합니다. 커밋 제목은 type(scope): 한국어 요약이며 update.md는 실제 검증 범위를 기록합니다. 자동 commit·remote·push는 수행하지 않습니다.
+
+## 관리 파일 수정 주의
+
+<!-- 기능 추가 시 .composer/state.json·진단·lock·산출물을 임의 편집하지 않습니다. 사용자 DI·업무 소스는 직접 수정합니다. -->
+
+직접 수정하지 않는 관리 기록과 수정 가능한 파일의 구분은 [관리 파일 안내](docs/managedFiles.md)를 따릅니다.

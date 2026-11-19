@@ -21,3 +21,9 @@ integrated의 npm start는 dist/backend 실행과 dist/frontend 정적 제공을
 DI·업무·문서는 사용자 소유이고 매니페스트는 생성기 관리입니다. 자동 기능 추가는 아직 제공하지 않으며 state·baseline을 수정해 우회하지 않습니다. 기존 앱은 자동 이행하지 않습니다. 개발 재시작은 메모리 상태를 초기화하지만 사용자 저장 데이터를 임의 삭제하지 않습니다.
 
 Composer와 독립 Git 저장소입니다. 소스·테스트·문서·설정·.env.example·package-lock.json·.composer/state.json·.gitkeep을 저장하고 .env·키·토큰·node_modules·dist는 제외합니다. 커밋 제목은 type(scope): 한국어 요약이며 update.md에는 실제 검증·미검증을 기록합니다. 자동 commit·remote·push는 수행하지 않습니다.
+
+## 관리 파일 수정 주의
+
+<!-- 기능 추가 시 .composer/state.json·진단·lock·산출물을 임의 편집하지 않습니다. 사용자 DI·업무 소스는 직접 수정합니다. -->
+
+직접 수정하지 않는 관리 기록과 수정 가능한 파일의 구분은 [관리 파일 안내](docs/managedFiles.md)를 따릅니다.
