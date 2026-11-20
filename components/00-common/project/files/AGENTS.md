@@ -26,3 +26,28 @@ DI·업무·문서는사용자 소유입니다. 필수 연결은 최초 생성 �
 <!-- 관리 기록 임의 수정 금지: .composer/state.json·diagnostic.json은 도구가 관리하고 package-lock.json은 npm으로 갱신합니다. 추가 기능 때문에 해당 기록이나 verify 검사를 바꾸지 않습니다. DI는 사용자 수정 대상입니다. -->
 
 관리 파일과 사용자 소스의 상세 수정 범위는 [관리 파일 안내](docs/managedFiles.md)를 따릅니다.
+
+## 문서 다이어그램 요청
+
+“현재 구현 기준으로 docs/diagrams의 다이어그램을 기존 구조에 맞춰 갱신해줘.”라는 요청을 받으면 대상 저장소의 코드와, 파일이 있으면 `docs/diagrams/README.md`를 먼저 확인하고 Archify 스킬을 사용합니다. 대상 저장소를 지정하면 그 저장소의 다이어그램에만 적용합니다.
+
+- 기존 `docs/diagrams/`의 기능별 폴더, 파일명, 인덱스 구성과 산출물 형식을 유지합니다. 해당되는 기능의 `candidate.json`과 HTML을 갱신하고, 목록이나 검사 결과가 바뀌면 기존 인덱스·매니페스트·검증 요약에도 반영합니다.
+- 기존 구조나 참조 저장소를 읽을 수 없으면 대상 저장소에 아래 기본 구조로 새로 작성합니다. 전체 구조는 `01-overview`로 두고, 기능별 흐름은 `02-<기능명>`부터 번호와 kebab-case 이름을 붙여 나눕니다.
+
+```text
+docs/diagrams/
+├── README.md
+├── index.html
+├── manifest.json
+├── verification.json
+├── 01-overview/
+│   ├── candidate.json
+│   └── 01-overview.html
+└── 02-<기능명>/
+    ├── candidate.json
+    └── 02-<기능명>.html
+```
+
+- `README.md`에는 열람·재생성 방법을, `index.html`에는 전체 구조와 기능별 그림의 링크를 둡니다. `manifest.json`에는 각 그림의 `slug`, `title`, `summary`, `type`을 기록합니다. `verification.json`에는 그림별 소스 리비전·검사 결과를 기록하고, 생성된 검증 기록은 해당 그림 폴더에 둡니다.
+- 현재 구현을 근거로 작성하고 소스 기준 리비전과 실제 검사 결과를 기록합니다. 다이어그램 생성·검사는 Archify 스킬을 따르며, 실행하지 못한 검사는 미검증으로 남깁니다.
+- 문서 변경과 함께 커밋이나 이전 커밋에 병합하는 작업은 요청에 포함된 경우에 수행합니다.
