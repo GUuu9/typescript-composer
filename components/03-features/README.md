@@ -4,6 +4,8 @@ Compose는 표준 구성과 필수 연결만 생성합니다. 추가 통신·Ser
 
 [Google 소셜 로그인](google-auth/files/docs/googleAuth.md)은 HTTP가 연결된 Node backend에 수동 적용합니다.
 
+[Resend 이메일 발송](resend/files/docs/resend.md)은 필요한 Node backend에 복사해 연결할 수 있습니다.
+
 1. 해당 기능의 files/ 아래 소스와 docs를 앱의 같은 상대 경로로 복사합니다. 기존 파일은 덮어쓰지 말고 변경 내용을 직접 비교합니다.
 2. 기능별 문서의 패키지·환경 키를 확인하고 앱 package.json과 .env.example에 필요한 항목만 직접 추가합니다. 실제 .env는 사용자만 작성합니다.
 3. 공통 config·util·수명 계약 import가 가리키는 파일도 확인합니다. Node/Main 기능은 backend가 없는 웹 앱에 복사하지 않습니다.
